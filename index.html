@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Red Data Book – Endangered & Extinct Animals Encyclopedia</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green-dark: #0d3b2e;
+  --green: #1a5c45;
+  --green-mid: #2e8b57;
+  --green-light: #e8f5e9;
+  --earth: #5d4037;
+  --cream: #faf8f5;
+  --white: #ffffff;
+  --text: #1a1a1a;
+  --muted: #555;
+  --card-shadow: 0 8px 24px rgba(13,59,46,0.12);
+  --radius: 12px;
+  --transition: 0.25s ease;
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+img { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+a { color: var(--green); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--green-mid); }
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; color: var(--green-dark); }
+.container { width: min(1200px, 92%); margin-inline: auto; }
+
+/* ===== LANGUAGE TOGGLE (pure CSS) ===== */
+.lang-switch {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.15);
+  padding: 0.25rem;
+  border-radius: 999px;
+}
+.lang-switch input { display: none; }
+.lang-switch label {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  transition: background var(--transition);
+}
+#lang-en:checked ~ .lang-switch label[for="lang-en"],
+#lang-hi:checked ~ .lang-switch label[for="lang-hi"] {
+  background: var(--white);
+  color: var(--green-dark);
+}
+/* Hide opposite language content */
+.lang-hi { display: none; }
+#lang-hi:checked ~ * .lang-en,
+#lang-hi:checked ~ * .lang-en * { display: none !important; }
+#lang-hi:checked ~ * .lang-hi { display: block !important; }
+#lang-hi:checked ~ * .lang-hi.inline { display: inline !important; }
+#lang-en:checked ~ * .lang-hi { display: none !important; }
+#lang-en:checked ~ * .lang-en { display: block !important; }
+#lang-en:checked ~ * .lang-en.inline { display: inline !important; }
+
+/* ===== NAV ===== */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+}
+.logo {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.logo span { color: #a5d6a7; }
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  list-style: none;
+}
+nav a {
+  color: #e0f2f1;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.3rem 0;
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: #a5d6a7;
+  transition: width var(--transition);
+}
+nav a:hover::after { width: 100%; }
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(160deg, #0d3b2e 0%, #1a5c45 40%, #2e8b57 100%);
+  color: #fff;
+  padding: 4.5rem 0 5rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1600&q=80') center/cover;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+.hero-content { position: relative; z-index: 1; max-width: 720px; }
+.hero h1 {
+  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  color: #fff;
+  margin-bottom: 1rem;
+}
+.hero p { font-size: 1.15rem; opacity: 0.92; margin-bottom: 1.75rem; }
+.btn {
+  display: inline-block;
+  background: #fff;
+  color: var(--green-dark);
+  font-weight: 700;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); color: var(--green); }
+
+/* ===== STATS ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-top: -2.5rem;
+  position: relative;
+  z-index: 2;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+.stat-card strong {
+  display: block;
+  font-size: 1.9rem;
+  color: var(--green);
+  margin-bottom: 0.25rem;
+}
+.stat-card span { font-size: 0.9rem; color: var(--muted); }
+
+/* ===== SECTIONS ===== */
+section { padding: 4rem 0; }
+.section-title {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+}
+.section-sub {
+  text-align: center;
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+}
+.divider {
+  width: 60px; height: 4px;
+  background: var(--green-mid);
+  margin: 0.75rem auto 0;
+  border-radius: 2px;
+}
+
+/* ===== CARDS GRID ===== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 32px rgba(13,59,46,0.18);
+}
+.card-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.card-badge {
+  position: absolute;
+  top: 0.75rem; right: 0.75rem;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+.badge-ex { background: #b71c1c; }
+.badge-cr { background: #d32f2f; }
+.badge-en { background: #f57c00; }
+.badge-vu { background: #fbc02d; color: #333; }
+.badge-nt { background: #388e3c; }
+.card-body { padding: 1.15rem 1.25rem 1.4rem; flex: 1; display: flex; flex-direction: column; }
+.card-body h3 { font-size: 1.15rem; margin-bottom: 0.35rem; }
+.card-body .sci { font-style: italic; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.6rem; }
+.card-body p { font-size: 0.9rem; color: var(--muted); flex: 1; }
+.card-link {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.card-link::after { content: '→'; transition: transform var(--transition); }
+.card:hover .card-link::after { transform: translateX(4px); }
+
+/* ===== CATEGORY HEADINGS ===== */
+.cat-heading {
+  margin: 2.5rem 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--green-light);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.cat-heading span {
+  background: var(--green);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+}
+
+/* ===== ANIMAL DETAIL ===== */
+.detail {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 90px;
+}
+.detail-header {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+  margin-bottom: 1.75rem;
+}
+@media (max-width: 768px) {
+  .detail-header { grid-template-columns: 1fr; }
+}
+.detail-img {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #eee;
+  min-height: 280px;
+  background-size: cover;
+  background-position: center;
+}
+.detail-img1 {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #eee;
+  min-height: 280px;
+  background-size: cover;
+  background-position: center;
+  width: 500px;
+}
+.detail-meta h2 { font-size: 1.85rem; margin-bottom: 0.25rem; }
+.detail-meta .sci { font-style: italic; color: var(--muted); margin-bottom: 1rem; }
+.status-pill {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem 2rem;
+}
+.detail-block h4 {
+  font-size: 0.95rem;
+  color: var(--green);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.detail-block p, .detail-block ul { font-size: 0.95rem; color: #333; }
+.detail-block ul { padding-left: 1.1rem; }
+.detail-block li { margin-bottom: 0.3rem; }
+.sources {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* ===== EXPLORER / LIST ===== */
+.explorer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+.explorer-list a {
+  background: var(--white);
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background var(--transition), transform var(--transition);
+}
+.explorer-list a:hover {
+  background: var(--green-light);
+  transform: translateX(4px);
+}
+.explorer-list .status-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  color: #fff;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--green-dark);
+  color: #c8e6c9;
+  padding: 3rem 0 1.5rem;
+  margin-top: 3rem;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+footer h4 { color: #fff; margin-bottom: 0.75rem; }
+footer ul { list-style: none; }
+footer a { color: #a5d6a7; font-size: 0.9rem; }
+footer a:hover { color: #fff; }
+.copyright {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* ===== UTILITIES ===== */
+.note {
+  background: #fff3e0;
+  border-left: 4px solid #f57c00;
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.alpha-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.alpha-nav a {
+  width: 2rem; height: 2rem;
+  display: grid; place-items: center;
+  background: var(--white);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.alpha-nav a:hover { background: var(--green); color: #fff; }
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  nav ul { gap: 0.5rem 0.9rem; font-size: 0.9rem; }
+  .hero { padding: 3rem 0 4rem; }
+  .detail { padding: 1.25rem; }
+}
+</style>
+</head>
+
+
+<!--==========================  BODY PART START  ==========================-->
+
+
+<body>
+
+<!-- Hidden language radios (must be early for sibling selectors) -->
+<input type="radio" name="lang" id="lang-en" checked>
+<input type="radio" name="lang" id="lang-hi">
+
+<header>
+  <div class="container nav-inner">
+    <div class="logo">
+      <span class="lang-en">🌿 Red Data Book</span>
+      <span class="lang-hi">🌿 रेड डेटा बुक</span>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#home"><span class="lang-en">Home</span><span class="lang-hi">होम</span></a></li>
+        <li><a href="#extinct"><span class="lang-en">Extinct</span><span class="lang-hi">विलुप्त</span></a></li>
+        <li><a href="#endangered"><span class="lang-en">Endangered</span><span class="lang-hi">संकटग्रस्त</span></a></li>
+        <li><a href="#explorer"><span class="lang-en">Explorer</span><span class="lang-hi">एक्सप्लोरर</span></a></li>
+        <li><a href="#about"><span class="lang-en">About</span><span class="lang-hi">परिचय</span></a></li>
+      </ul>
+    </nav>
+    <div class="lang-switch">
+      <label for="lang-en">EN</label>
+      <label for="lang-hi">हिंदी</label>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HOME ===================== -->
+<section id="home" class="hero">
+  <div class="container hero-content">
+    <h1>
+      <span class="lang-en">Interactive Red Data Book</span>
+      <span class="lang-hi">इंटरैक्टिव रेड डेटा बुक</span>
+    </h1>
+    <p class="lang-en">
+      An educational encyclopedia of animals that are extinct, extinct in the wild, critically endangered, endangered, vulnerable and near threatened — based on the IUCN Red List.
+    </p>
+    <p class="lang-hi">
+      विलुप्त, जंगली में विलुप्त, गंभीर रूप से संकटग्रस्त, संकटग्रस्त, सुभेद्य और निकट संकटग्रस्त जानवरों का शैक्षिक विश्वकोश — IUCN रेड लिस्ट पर आधारित।
+    </p>
+    <a href="#explorer" class="btn">
+      <span class="lang-en">Explore Animals →</span>
+      <span class="lang-hi">जानवरों को देखें →</span>
+    </a>
+  </div>
+</section>
+
+<div class="container">
+  <div class="stats">
+    <div class="stat-card">
+      <strong>~48,600+</strong>
+      <span class="lang-en">Species threatened with extinction</span>
+      <span class="lang-hi">विलुप्ति के खतरे में प्रजातियाँ</span>
+    </div>
+    <div class="stat-card">
+      <strong>~172,600+</strong>
+      <span class="lang-en">Species assessed by IUCN</span>
+      <span class="lang-hi">IUCN द्वारा आकलित प्रजातियाँ</span>
+    </div>
+    <div class="stat-card">
+      <strong>900+</strong>
+      <span class="lang-en">Species listed as Extinct (EX)</span>
+      <span class="lang-hi">विलुप्त (EX) सूचीबद्ध प्रजातियाँ</span>
+    </div>
+    <div class="stat-card">
+      <strong>28%</strong>
+      <span class="lang-en">of assessed species are threatened</span>
+      <span class="lang-hi">आकलित प्रजातियों में से संकटग्रस्त</span>
+    </div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="container">
+    <h2 class="section-title">
+      <span class="lang-en">Why the Red Data Book matters</span>
+      <span class="lang-hi">रेड डेटा बुक क्यों महत्वपूर्ण है</span>
+    </h2>
+    <div class="divider"></div>
+    <p class="section-sub lang-en">
+      Biodiversity loss is accelerating. Habitat destruction, climate change, over-exploitation, pollution and invasive species are driving species toward extinction at rates far above natural background levels. The IUCN Red List is the global standard for assessing extinction risk.
+    </p>
+    <p class="section-sub lang-hi">
+      जैव विविधता का नुकसान तेज हो रहा है। आवास विनाश, जलवायु परिवर्तन, अत्यधिक दोहन, प्रदूषण और आक्रामक प्रजातियाँ प्रजातियों को प्राकृतिक दर से कहीं अधिक तेजी से विलुप्ति की ओर धकेल रही हैं। IUCN रेड लिस्ट विलुप्ति जोखिम का वैश्विक मानक है।
+    </p>
+    <div class="note">
+      <strong class="lang-en">Limitation note:</strong>
+      <strong class="lang-hi">सीमा नोट:</strong>
+      <span class="lang-en"> This single-file HTML/CSS site cannot offer real-time search or dynamic multi-filter because JavaScript is forbidden. Use the alphabetical explorer, category sections and direct links. Population numbers and status are approximate and change; always verify on the official IUCN Red List website.</span>
+      <span class="lang-hi"> यह एकल HTML/CSS फ़ाइल वास्तविक समय खोज या गतिशील फ़िल्टर नहीं दे सकती क्योंकि जावास्क्रिप्ट निषिद्ध है। वर्णमाला एक्सप्लोरर, श्रेणी अनुभाग और सीधे लिंक का उपयोग करें। जनसंख्या संख्या और स्थिति अनुमानित हैं और बदलती रहती हैं; हमेशा आधिकारिक IUCN रेड लिस्ट वेबसाइट पर सत्यापित करें।</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== EXTINCT ========== -->
+<section id="extinct" style="background:#f5f0eb;">
+  <div class="container">
+    <h2 class="section-title">
+      <span class="lang-en">Extinct Animals (EX)</span>
+      <span class="lang-hi">विलुप्त जानवर (EX)</span>
+    </h2>
+    <div class="divider"></div>
+    <p class="section-sub lang-en">Species for which there is no reasonable doubt that the last individual has died. Many extinctions after 1500 AD are human-driven.</p>
+    <p class="section-sub lang-hi">वे प्रजातियाँ जिनके बारे में कोई उचित संदेह नहीं कि अंतिम व्यक्ति मर चुका है। 1500 ई. के बाद कई विलुप्तियाँ मानव-चालित हैं।</p>
+
+    <div class="cards">
+      <!-- Dodo -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://colossal.com/wp-content/uploads/dodo-Header-blog-1024x392.jpeg')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Dodo</span><span class="lang-hi">डोडो</span></h3>
+          <div class="sci">Raphus cucullatus</div>
+          <p class="lang-en">Flightless bird endemic to Mauritius. Extinct by late 17th century after human arrival, hunting and introduced animals.</p>
+          <p class="lang-hi">मॉरीशस का उड़ानहीन पक्षी। मानव आगमन, शिकार और लाए गए जानवरों के बाद 17वीं शताब्दी के अंत तक विलुप्त।</p>
+          <a href="#dodo" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Thylacine -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Thylacinus_cropped.png/960px-Thylacinus_cropped.png?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Thylacine (Tasmanian Tiger)</span><span class="lang-hi">थाइलासीन (तस्मानियाई बाघ)</span></h3>
+          <div class="sci">Thylacinus cynocephalus</div>
+          <p class="lang-en">Largest known carnivorous marsupial of modern times. Last known individual died in captivity in 1936.</p>
+          <p class="lang-hi">आधुनिक काल का सबसे बड़ा ज्ञात मांसाहारी मार्सुपियल। अंतिम ज्ञात व्यक्ति 1936 में कैद में मरा।</p>
+          <a href="#thylacine" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Passenger Pigeon -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://bagheera.com/wp-content/uploads/2021/09/passenger_pigeon_large.jpg')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Passenger Pigeon</span><span class="lang-hi">यात्री कबूतर</span></h3>
+          <div class="sci">Ectopistes migratorius</div>
+          <p class="lang-en">Once the most abundant bird in North America. Driven to extinction by commercial hunting and habitat loss; last individual died 1914.</p>
+          <p class="lang-hi">एक समय उत्तरी अमेरिका का सबसे प्रचुर पक्षी। व्यावसायिक शिकार और आवास हानि से विलुप्त; अंतिम व्यक्ति 1914 में मरा।</p>
+          <a href="#passenger-pigeon" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Quagga -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-boTnfsB1Kdr3VWfGLb6pfUsGQwXZRPFxJwxx4NZCTNHTo86mY3RKgFjO&s=10')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Quagga</span><span class="lang-hi">क्वाग्गा</span></h3>
+          <div class="sci">Equus quagga quagga</div>
+          <p class="lang-en">Subspecies of plains zebra from South Africa. Extinct in the wild by 1870s; last captive animal died 1883.</p>
+          <p class="lang-hi">दक्षिण अफ्रीका का मैदानी ज़ेबरा का उप-प्रजाति। 1870 के दशक तक जंगली में विलुप्त; अंतिम कैद जानवर 1883 में मरा।</p>
+          <a href="#quagga" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Steller's Sea Cow -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTclpnaqBdzXZF5Ot4x6N3cofKyyZrPjK3XSWH36mWuBA&s=10')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Steller's Sea Cow</span><span class="lang-hi">स्टेलर की समुद्री गाय</span></h3>
+          <div class="sci">Hydrodamalis gigas</div>
+          <p class="lang-en">Giant sirenian discovered 1741 around Commander Islands. Hunted to extinction within 27 years.</p>
+          <p class="lang-hi">1741 में कमांडर द्वीपों के आसपास खोजी गई विशाल सायरनियन। 27 वर्षों के भीतर शिकार से विलुप्त।</p>
+          <a href="#stellers-sea-cow" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Great Auk -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://media.longnow.org/files/2/Gazza-marina-Hornoya_MRavasini_IMG_6620.jpg')">
+          <span class="card-badge badge-ex">EX</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Great Auk</span><span class="lang-hi">महान ऑक</span></h3>
+          <div class="sci">Pinguinus impennis</div>
+          <p class="lang-en">Flightless seabird of the North Atlantic. Last confirmed pair killed on Eldey island in 1844.</p>
+          <p class="lang-hi">उत्तरी अटलांटिक का उड़ानहीन समुद्री पक्षी। अंतिम पुष्टि युगल 1844 में एल्डे द्वीप पर मारे गए।</p>
+          <a href="#great-auk" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <!-- Atlas Bear -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtc0NkY3TzGHIygnBo2_SAh93QGJxqyG22Tgya5RHopxQy3knFv3xuMqUd&s=10');">
+          <span class="card-badge badge-ex">Ex</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Atlas Bear</span><span class="lang-hi">एटलस बियर</span></h3>
+          <div class="sci">Ursus arctos crowtheri</div>
+          <p class="lang-en"> Africa's only native brown bear, once found across the Atlas Mountains, hunted to extinction with the last confirmed specimen killed in Morocco around 1870.</p>
+          <p class="lang-hi">अफ्रीका का एकमात्र मूल भूरा भालू, जो कभी एटलस पर्वतमाला में पाया जाता था; अत्यधिक शिकार के कारण 1870 के आसपास मोरक्को में अंतिम पुष्टि के साथ यह विलुप्त हो गया।</p>
+          <a href="#atlas-bear" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+
+      <!-- Carolina Parakeet -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE5sIhn_JP_y565FutODx68PbK7wfMnEjcM-ccHp7oOa2r_u2-TLQCCXo&s=10');">
+          <span class="card-badge badge-ex">Ex</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Carolina Parakeet</span><span class="lang-hi">कैरोलिना पैराकीट</span></h3>
+          <div class="sci">Conuropsis carolinensis</div>
+          <p class="lang-en">Once native to eastern North America, this colourful parrot became extinct due to hunting and habitat loss. The last known captive bird died in 1918.</p>
+          <p class="lang-hi">यह रंगीन तोता कभी उत्तरी अमेरिका के पूर्वी भाग में पाया जाता था। शिकार और आवास के विनाश के कारण यह विलुप्त हो गया। अंतिम ज्ञात बंदी पक्षी की मृत्यु 1918 में हुई।</p>
+          <a href="#carolina-parakeet" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== ENDANGERED ========== -->
+<section id="endangered">
+  <div class="container">
+    <h2 class="section-title">
+      <span class="lang-en">Threatened Animals</span>
+      <span class="lang-hi">संकटग्रस्त जानवर</span>
+    </h2>
+    <div class="divider"></div>
+    <p class="section-sub lang-en">Grouped by IUCN categories: Critically Endangered (CR), Endangered (EN), Vulnerable (VU), Near Threatened (NT).</p>
+    <p class="section-sub lang-hi">IUCN श्रेणियों के अनुसार समूहबद्ध: गंभीर रूप से संकटग्रस्त (CR), संकटग्रस्त (EN), सुभेद्य (VU), निकट संकटग्रस्त (NT)।</p>
+
+    <!-- CR -->
+    <h3 class="cat-heading"><span>CR</span> <span class="lang-en">Critically Endangered</span><span class="lang-hi">गंभीर रूप से संकटग्रस्त</span></h3>
+    <div class="cards">
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://images.pexels.com/photos/35144191/pexels-photo-35144191.jpeg')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Amur Leopard</span><span class="lang-hi">अमूर तेंदुआ</span></h3>
+          <div class="sci">Panthera pardus orientalis</div>
+          <p class="lang-en">One of the rarest big cats. Roughly 100 individuals remain in the wild in the Russian Far East and northeast China.</p>
+          <p class="lang-hi">सबसे दुर्लभ बड़े बिल्लियों में से एक। रूसी सुदूर पूर्व और उत्तर-पूर्व चीन में जंगली में लगभग 100 व्यक्ति शेष।</p>
+          <a href="#amur-leopard" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://res.cloudinary.com/dr0zfbman/images/w_850,h_500,c_scale/f_auto,q_auto:good/v1777608103/WordPress%20Content/Vaquita-2/Vaquita-2.jpg?_i=AA')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Vaquita</span><span class="lang-hi">वाक्विटा</span></h3>
+          <div class="sci">Phocoena sinus</div>
+          <p class="lang-en">World’s most endangered marine mammal. Fewer than 20 individuals estimated in the northern Gulf of California.</p>
+          <p class="lang-hi">दुनिया का सबसे संकटग्रस्त समुद्री स्तनपायी। कैलिफोर्निया की उत्तरी खाड़ी में 20 से कम व्यक्ति अनुमानित।</p>
+          <a href="#vaquita" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS44C1ABpeorOM-iX44g1WZf-PMv-iaL0vJc9awSlG9bJBvEi6NmEkqX0s&s=10')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Javan Rhinoceros</span><span class="lang-hi">जावा गैंडा</span></h3>
+          <div class="sci">Rhinoceros sondaicus</div>
+          <p class="lang-en">Only ~18 individuals remain, all in Ujung Kulon National Park, Java. Highly threatened by habitat loss and disease risk.</p>
+          <p class="lang-hi">केवल ~18 व्यक्ति शेष, सभी जावा के उजुंग कुलोन राष्ट्रीय उद्यान में। आवास हानि और रोग जोखिम से अत्यधिक संकटग्रस्त।</p>
+          <a href="#javan-rhino" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo4z9y-5aETL9f6TEgQtbo-QInQEsFalUNKgJ2A0Xryg1bl0Sx_0Czg-NZ&s=10')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Sumatran Orangutan</span><span class="lang-hi">सुमात्रा ऑरंगुटान</span></h3>
+          <div class="sci">Pongo abelii</div>
+          <p class="lang-en">Found only in northern Sumatra. Population estimated around 14,000; habitat loss from palm oil and logging is primary threat.</p>
+          <p class="lang-hi">केवल उत्तरी सुमात्रा में पाए जाते हैं। जनसंख्या लगभग 14,000 अनुमानित; ताड़ तेल और कटाई से आवास हानि मुख्य खतरा।</p>
+          <a href="#sumatran-orangutan" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+    </div>
+
+    <!-- EN -->
+    <h3 class="cat-heading"><span>EN</span> <span class="lang-en">Endangered</span><span class="lang-hi">संकटग्रस्त</span></h3>
+    <div class="cards">
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://media.istockphoto.com/id/2171220206/photo/bengal-tiger-walking-towards-me.jpg?s=612x612&w=0&k=20&c=bNA4XCgv4M6BDhNqScCv2vMW_bqQtEAEBxNyJUsuHkI=')">
+          <span class="card-badge badge-en">EN</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Bengal Tiger</span><span class="lang-hi">बंगाल बाघ</span></h3>
+          <div class="sci">Panthera tigris tigris</div>
+          <p class="lang-en">Largest living cat subspecies. India holds the majority of the global population; still threatened by poaching and habitat fragmentation.</p>
+          <p class="lang-hi">सबसे बड़ी जीवित बिल्ली उप-प्रजाति। भारत में वैश्विक जनसंख्या का अधिकांश हिस्सा; अभी भी शिकार और आवास विखंडन से संकटग्रस्त।</p>
+          <a href="#bengal-tiger" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT0hCvBZuhQmiA9S7DMIlN1clikieatff93gzLslyKPxUw6Pc6TQb0SYE&s=10')">
+          <span class="card-badge badge-en">EN</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Asian Elephant</span><span class="lang-hi">एशियाई हाथी</span></h3>
+          <div class="sci">Elephas maximus</div>
+          <p class="lang-en">Population declining across South and Southeast Asia due to habitat loss, human-elephant conflict and ivory poaching.</p>
+          <p class="lang-hi">आवास हानि, मानव-हाथी संघर्ष और हाथीदांत शिकार के कारण दक्षिण और दक्षिण-पूर्व एशिया में जनसंख्या घट रही है।</p>
+          <a href="#asian-elephant" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://animalfactguide.com/wp-content/uploads/2025/03/snow-leopard-sitting.jpg')">
+          <span class="card-badge badge-en">EN / VU*</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Snow Leopard</span><span class="lang-hi">हिम तेंदुआ</span></h3>
+          <div class="sci">Panthera uncia</div>
+          <p class="lang-en">High-altitude specialist of Central Asia. Status improved in some assessments but still faces poaching and climate-driven habitat change.</p>
+          <p class="lang-hi">मध्य एशिया का उच्च-ऊंचाई विशेषज्ञ। कुछ आकलनों में स्थिति सुधरी लेकिन अभी भी शिकार और जलवायु-चालित आवास परिवर्तन का सामना।</p>
+          <a href="#snow-leopard" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+
+      <!-- Chimpanzee -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://i.natgeofe.com/k/8bf67d56-59ff-4a9c-adf8-aa9cd51000ff/chimpanzee-with-baby_3x2.jpg');">
+          <span class="card-badge badge-en">EN</span>
+        </div>
+        <div class="card-body">
+          <h3>
+            <span class="lang-en">Chimpanzee</span>
+            <span class="lang-hi">चिम्पैंज़ी</span>
+          </h3>
+          <div class="sci">Pan troglodytes</div>
+          <p class="lang-en">A highly intelligent and social great ape native to African forests. It is threatened by habitat loss, hunting, and disease.</p>
+          <p class="lang-hi">अफ्रीका के जंगलों में पाया जाने वाला बुद्धिमान और सामाजिक महावानर। यह आवास की हानि, शिकार और बीमारियों के कारण खतरे में है।</p>
+          <a href="#chimpanzee" class="card-link">
+            <span class="lang-en">Full details</span>
+            <span class="lang-hi">पूर्ण विवरण</span>
+          </a>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- VU / NT -->
+    <h3 class="cat-heading"><span>VU / NT</span> <span class="lang-en">Vulnerable & Near Threatened</span><span class="lang-hi">सुभेद्य और निकट संकटग्रस्त</span></h3>
+    <div class="cards">
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFbSzwvYT0MzMdFQJbf7eedXE2-usGDx3E7zZioTCsPuuuu46sipBKbDCH&s=10')">
+          <span class="card-badge badge-vu">EN / VU</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Blue Whale</span><span class="lang-hi">नीली व्हेल</span></h3>
+          <div class="sci">Balaenoptera musculus</div>
+          <p class="lang-en">Largest animal ever known. Populations recovering slowly after commercial whaling; still face ship strikes and climate impacts on krill.</p>
+          <p class="lang-hi">अब तक ज्ञात सबसे बड़ा जानवर। व्यावसायिक व्हेलिंग के बाद धीरे-धीरे ठीक हो रही जनसंख्या; अभी भी जहाज टक्कर और क्रिल पर जलवायु प्रभाव।</p>
+          <a href="#blue-whale" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYnxr3jEBezWFgFG3lmNrxUojTF0XDegP2pQGUGzZqGHi_lj_agW3Lxh0&s=10')">
+          <span class="card-badge badge-en">EN</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Red Panda</span><span class="lang-hi">लाल पांडा</span></h3>
+          <div class="sci">Ailurus fulgens</div>
+          <p class="lang-en">Arboreal mammal of the eastern Himalayas and southwestern China. Threatened by deforestation and fragmentation.</p>
+          <p class="lang-hi">पूर्वी हिमालय और दक्षिण-पश्चिमी चीन का वृक्षवासी स्तनपायी। वनों की कटाई और विखंडन से संकटग्रस्त।</p>
+          <a href="#red-panda" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://www.nps.gov/pais/learn/nature/images/Hawksbill-Photo-Credit-US-Fish-and-Wildlife.jpg')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3><span class="lang-en">Hawksbill Turtle</span><span class="lang-hi">हॉक्सबिल कछुआ</span></h3>
+          <div class="sci">Eretmochelys imbricata</div>
+          <p class="lang-en">Tropical sea turtle prized for its shell. Critically endangered due to trade, bycatch and nesting beach loss.</p>
+          <p class="lang-hi">अपने खोल के लिए प्रसिद्ध उष्णकटिबंधीय समुद्री कछुआ। व्यापार, बायकैच और घोंसले के समुद्र तट हानि से गंभीर रूप से संकटग्रस्त।</p>
+          <a href="#hawksbill" class="card-link"><span class="lang-en">Full details</span><span class="lang-hi">पूर्ण विवरण</span></a>
+        </div>
+      </article>
+
+
+<!-- ========== Saola =========== -->
+      <article class="card">
+        <div class="card-img" style="background-image:url('https://photos.mongabay.com/j/5.jpg')">
+          <span class="card-badge badge-cr">CR</span>
+        </div>
+        <div class="card-body">
+          <h3>
+            <span class="lang-en">Saola</span>
+            <span class="lang-hi">साओला</span>
+          </h3>
+          <div class="sci">Pseudoryx nghetinhensis</div>
+          <p class="lang-en">Known as the Asian Unicorn, this extremely rare mammal lives in the forests of Vietnam and Laos. Threatened by illegal hunting and habitat loss.</p>
+          <p class="lang-hi">एशियन यूनिकॉर्न के नाम से प्रसिद्ध यह दुर्लभ स्तनधारी वियतनाम और लाओस के जंगलों में पाया जाता है। अवैध शिकार और आवास की हानि से खतरे में है।</p>
+          <a href="#saola" class="card-link">
+            <span class="lang-en">Full details</span>
+            <span class="lang-hi">पूर्ण विवरण</span>
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- ==========  ANIMAL EXPLORER ========== -->
+<section id="explorer" style="background:#f0f7f4;">
+  <div class="container">
+    <h2 class="section-title">
+      <span class="lang-en">Animal Explorer</span>
+      <span class="lang-hi">जानवर एक्सप्लोरर</span>
+    </h2>
+    <div class="divider"></div>
+    <p class="section-sub lang-en">Click any name to jump to its detail section. Alphabetical anchors and status tags help navigation. (True live search requires JavaScript and is not available here.)</p>
+    <p class="section-sub lang-hi">किसी भी नाम पर क्लिक करके उसके विवरण अनुभाग पर जाएँ। वर्णमाला एंकर और स्थिति टैग नेविगेशन में मदद करते हैं। (वास्तविक लाइव खोज के लिए जावास्क्रिप्ट आवश्यक है और यहाँ उपलब्ध नहीं।)</p>
+
+    <div class="alpha-nav">
+      <a href="#a">A</a><a href="#b">B</a><a href="#d">D</a><a href="#c">C</a><a href="#g">G</a><a href="#h">H</a><a href="#j">J</a><a href="#p">P</a><a href="#q">Q</a><a href="#r">R</a><a href="#s">S</a><a href="#t">T</a><a href="#v">V</a>
+    </div>
+
+    <div class="explorer-list">
+      <a href="#amur-leopard" id="a"><span class="lang-en">Amur Leopard</span><span class="lang-hi">अमूर तेंदुआ</span> <span class="status-tag badge-cr">CR</span></a>
+      <a href="#atlas-bear" ><span class="lang-en">Atlas Bear</span><span class="lang-hi">एटलस बियर</span> <span class="status-tag badge-ex">EX</span></a>    
+      <a href="#asian-elephant"><span class="lang-en">Asian Elephant</span><span class="lang-hi">एशियाई हाथी</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#bengal-tiger" id="b"><span class="lang-en">Bengal Tiger</span><span class="lang-hi">बंगाल बाघ</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#blue-whale"><span class="lang-en">Blue Whale</span><span class="lang-hi">नीली व्हेल</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#carolina-parakeet"><span class="lang-en">Carolina Parakeet</span><span class="lang-hi">कैरोलिना पैराकीट</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#chimpanzee" id="c"><span class="lang-en">Chimpanzee</span><span class="lang-hi">चिम्पैंज़ी</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#dodo" id="d"><span class="lang-en">Dodo</span><span class="lang-hi">डोडो</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#great-auk" id="g"><span class="lang-en">Great Auk</span><span class="lang-hi">महान ऑक</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#hawksbill" id="h"><span class="lang-en">Hawksbill Turtle</span><span class="lang-hi">हॉक्सबिल कछुआ</span> <span class="status-tag badge-cr">CR</span></a>
+      <a href="#javan-rhino" id="j"><span class="lang-en">Javan Rhinoceros</span><span class="lang-hi">जावा गैंडा</span> <span class="status-tag badge-cr">CR</span></a>
+      <a href="#passenger-pigeon" id="p"><span class="lang-en">Passenger Pigeon</span><span class="lang-hi">यात्री कबूतर</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#quagga" id="q"><span class="lang-en">Quagga</span><span class="lang-hi">क्वाग्गा</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#red-panda" id="r"><span class="lang-en">Red Panda</span><span class="lang-hi">लाल पांडा</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#snow-leopard" id="s"><span class="lang-en">Snow Leopard</span><span class="lang-hi">हिम तेंदुआ</span> <span class="status-tag badge-en">EN</span></a>
+      <a href="#stellers-sea-cow"><span class="lang-en">Steller's Sea Cow</span><span class="lang-hi">स्टेलर की समुद्री गाय</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#sumatran-orangutan"><span class="lang-en">Sumatran Orangutan</span><span class="lang-hi">सुमात्रा ऑरंगुटान</span> <span class="status-tag badge-cr">CR</span></a>
+      <a href="#saola"><span class="lang-en">Saola</span><span class="lang-hi">साओला</span> <span class="status-tag badge-cr">CR</span></a>     
+      <a href="#thylacine" id="t"><span class="lang-en">Thylacine</span><span class="lang-hi">थाइलासीन</span> <span class="status-tag badge-ex">EX</span></a>
+      <a href="#vaquita" id="v"><span class="lang-en">Vaquita</span><span class="lang-hi">वाक्विटा</span> <span class="status-tag badge-cr">CR</span></a>
+   
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- ========== DETAILED PAGES (selected) ========== -->
+<section style="background:var(--cream);">
+  <div class="container">
+    <h2 class="section-title">
+      <span class="lang-en">Animal Details</span>
+      <span class="lang-hi">जानवर विवरण</span>
+    </h2>
+    <div class="divider"></div>
+
+    <!-- DODO -->
+    <article class="detail" id="dodo">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त पर वापस</span></a>
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://colossal.com/wp-content/uploads/dodo-Header-blog-1024x392.jpeg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Dodo</span><span class="lang-hi">डोडो</span></h2>
+          <div class="sci">Raphus cucullatus</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">The dodo was a flightless bird endemic to the island of Mauritius in the Indian Ocean. It became a symbol of human-caused extinction.
+          Hunting by sailors and settlers Introduced pigs, rats, monkeys, dogs destroying eggs and chicks Habitat clearance</p>
+          <p class="lang-hi">डोडो हिंद महासागर के मॉरीशस द्वीप का उड़ानहीन पक्षी था। यह मानव-जनित विलुप्ति का प्रतीक बन गया।
+          नाविकों और बसने वालों द्वारा शिकार लाए गए सूअर, चूहे, बंदर, कुत्ते अंडे और चूजों को नष्ट करते थे आवास सफाई</p>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Coastal and inland forests of Mauritius. Never occurred elsewhere.</p>
+          <p class="lang-hi">मॉरीशस के तटीय और अंतर्देशीय वन। कहीं और नहीं पाए गए।</p>
+        </div>
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Large, bulky, flightless. Estimated weight 10–18 kg. Large beak, stubby wings, strong legs.</p>
+          <p class="lang-hi">बड़ा, भारी, उड़ानहीन। अनुमानित वजन 10–18 किग्रा। बड़ा चोंच, छोटी पंख, मजबूत पैर।</p>
+        </div>
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Fruits, seeds, bulbs and possibly crabs or shellfish. Ground forager.</p>
+          <p class="lang-hi">फल, बीज, बल्ब और संभवतः केकड़े या शेलफिश। जमीन पर चारा खोजने वाला।</p>
+        </div>
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Hunting by sailors and settlers</li>
+            <li class="lang-hi">नाविकों और बसने वालों द्वारा शिकार</li>
+            <li class="lang-en">Introduced pigs, rats, monkeys, dogs destroying eggs and chicks</li>
+            <li class="lang-hi">लाए गए सूअर, चूहे, बंदर, कुत्ते अंडे और चूजों को नष्ट करते थे</li>
+            <li class="lang-en">Habitat clearance</li>
+            <li class="lang-hi">आवास सफाई</li>
+          </ul>
+        </div>
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Extinct by ~1662–1690. No complete specimen survives; knowledge comes from bones, drawings and written accounts.</p>
+          <p class="lang-hi">~1662–1690 तक विलुप्त। कोई पूर्ण नमूना नहीं बचा; ज्ञान हड्डियों, चित्रों और लिखित विवरणों से आता है।</p>
+        </div>
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>IUCN Red List; historical accounts; natural history museums.</p>
+        </div>
+      </div>
+      <div class="sources lang-en">Population: 0 (extinct). Last confirmed records mid-to-late 17th century.</div>
+      <div class="sources lang-hi">जनसंख्या: 0 (विलुप्त)। अंतिम पुष्टि रिकॉर्ड 17वीं शताब्दी के मध्य-अंत।</div>
+    </article>
+
+    <!-- AMUR LEOPARD -->
+    <article class="detail" id="amur-leopard">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Threatened</span><span class="lang-hi">संकटग्रस्त पर वापस</span></a>
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://images.pexels.com/photos/35144191/pexels-photo-35144191.jpeg?cs=srgb&dl=pexels-mateus-belarmino-1944648540-35144191.jpg&fm=jpg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Amur Leopard</span><span class="lang-hi">अमूर तेंदुआ</span></h2>
+          <div class="sci">Panthera pardus orientalis</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+          <p class="lang-en">One of the rarest big cats on Earth. Adapted to temperate forests of the Russian Far East and adjacent China.
+          Habitat loss and fragmentation (fires, logging, roads) Poaching for fur and traditional medicine Prey depletion and inbreeding risk</p>
+          <p class="lang-hi">पृथ्वी पर सबसे दुर्लभ बड़े बिल्लियों में से एक। रूसी सुदूर पूर्व और आसन्न चीन के समशीतोष्ण वनों के अनुकूल।
+          आवास हानि और विखंडन (आग, कटाई, सड़कें) फर और पारंपरिक दवा के लिए शिकार, शिकार की कमी और अंतःप्रजनन जोखिम</p>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Range</span><span class="lang-hi">आवास और सीमा</span></h4>
+          <p class="lang-en">Temperate broadleaf and mixed forests. Main population in Land of the Leopard National Park (Russia) and bordering Chinese reserves.</p>
+          <p class="lang-hi">समशीतोष्ण चौड़ी पत्ती और मिश्रित वन। मुख्य जनसंख्या लैंड ऑफ द लेपर्ड राष्ट्रीय उद्यान (रूस) और सीमावर्ती चीनी अभयारण्यों में।</p>
+        </div>
+        <div class="detail-block">
+          <h4>👥 <span class="lang-en">Population</span><span class="lang-hi">जनसंख्या</span></h4>
+          <p class="lang-en">Approximately 100 individuals in the wild (estimates vary; recent surveys suggest modest increase due to protection). Captive population also exists.</p>
+          <p class="lang-hi">जंगली में लगभग 100 व्यक्ति (अनुमान भिन्न; हाल के सर्वेक्षण संरक्षण के कारण मामूली वृद्धि सुझाते हैं)। कैद जनसंख्या भी मौजूद है।</p>
+        </div>
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Main Threats</span><span class="lang-hi">मुख्य खतरे</span></h4>
+          <ul>
+            <li class="lang-en">Habitat loss and fragmentation (fires, logging, roads)</li>
+            <li class="lang-hi">आवास हानि और विखंडन (आग, कटाई, सड़कें)</li>
+            <li class="lang-en">Poaching for fur and traditional medicine</li>
+            <li class="lang-hi">फर और पारंपरिक दवा के लिए शिकार</li>
+            <li class="lang-en">Prey depletion and inbreeding risk</li>
+            <li class="lang-hi">शिकार की कमी और अंतःप्रजनन जोखिम</li>
+          </ul>
+        </div>
+        <div class="detail-block">
+          <h4>🛡️ <span class="lang-en">Conservation</span><span class="lang-hi">संरक्षण</span></h4>
+          <p class="lang-en">Strict protected areas, anti-poaching patrols, corridor creation between Russia and China, captive breeding and monitoring programs.</p>
+          <p class="lang-hi">कड़े संरक्षित क्षेत्र, शिकार-विरोधी गश्त, रूस और चीन के बीच गलियारा निर्माण, कैद प्रजनन और निगरानी कार्यक्रम।</p>
+        </div>
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Facts</span><span class="lang-hi">तथ्य</span></h4>
+          <p class="lang-en">Thick fur and long legs adapted for snow. Can leap up to 6 m horizontally. Solitary and elusive.</p>
+          <p class="lang-hi">बर्फ के लिए अनुकूलित घना फर और लंबे पैर। क्षैतिज रूप से 6 मीटर तक कूद सकता है। एकाकी और मायावी।</p>
+        </div>
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>IUCN Red List; WWF; Land of the Leopard National Park reports.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- VAQUITA -->
+    <article class="detail" id="vaquita">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Threatened</span><span class="lang-hi">संकटग्रस्त पर वापस</span></a>
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://res.cloudinary.com/dr0zfbman/images/w_850,h_500,c_scale/f_auto,q_auto:good/v1777608103/WordPress%20Content/Vaquita-2/Vaquita-2.jpg?_i=AA')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Vaquita</span><span class="lang-hi">वाक्विटा</span></h2>
+          <div class="sci">Phocoena sinus</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+          <p class="lang-en">The world’s most endangered cetacean. Endemic to a small area in the northern Gulf of California, Mexico.
+          Entanglement in gillnets set for totoaba (also endangered) and other fish. Illegal fishing remains the dominant driver of mortality.</p>
+          <p class="lang-hi">दुनिया का सबसे संकटग्रस्त सिटेशियन। मेक्सिको की कैलिफोर्निया की उत्तरी खाड़ी के एक छोटे क्षेत्र में स्थानिक।
+          टोटोबा (भी संकटग्रस्त) और अन्य मछलियों के लिए लगाए गए गिलनेट में उलझना। अवैध मछली पकड़ना मृत्यु का प्रमुख चालक बना हुआ है।</p>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>👥 <span class="lang-en">Population</span><span class="lang-hi">जनसंख्या</span></h4>
+          <p class="lang-en">Fewer than 20 individuals estimated (some surveys suggest even lower). Decline continues primarily due to bycatch.</p>
+          <p class="lang-hi">20 से कम व्यक्ति अनुमानित (कुछ सर्वेक्षण और भी कम सुझाते हैं)। गिरावट मुख्य रूप से बायकैच के कारण जारी है।</p>
+        </div>
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Main Threat</span><span class="lang-hi">मुख्य खतरा</span></h4>
+          <p class="lang-en">Entanglement in gillnets set for totoaba (also endangered) and other fish. Illegal fishing remains the dominant driver of mortality.</p>
+          <p class="lang-hi">टोटोबा (भी संकटग्रस्त) और अन्य मछलियों के लिए लगाए गए गिलनेट में उलझना। अवैध मछली पकड़ना मृत्यु का प्रमुख चालक बना हुआ है।</p>
+        </div>
+        <div class="detail-block">
+          <h4>🛡️ <span class="lang-en">Conservation Efforts</span><span class="lang-hi">संरक्षण प्रयास</span></h4>
+          <p class="lang-en">Gillnet bans, enforcement, alternative livelihood programs, acoustic monitoring and emergency capture attempts (mostly unsuccessful so far).</p>
+          <p class="lang-hi">गिलनेट प्रतिबंध, प्रवर्तन, वैकल्पिक आजीविका कार्यक्रम, ध्वनिक निगरानी और आपातकालीन पकड़ने के प्रयास (अभी तक ज्यादातर असफल)।</p>
+        </div>
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>IUCN Red List; CIRVA reports; NOAA / Mexican government assessments.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- Additional short stubs for remaining animals (expandable pattern) -->
+     
+    <!-- THYLACINE -->
+    <article class="detail" id="thylacine">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.monaconatureencyclopedia.com/wp-content/uploads/2025/08/1-Thylacinus-cynocephalus-%C2%A9-wikipedia-ed.-mazza-monaconatureencyclopedia.jpg')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Thylacine (Tasmanian Tiger)</span><span class="lang-hi">थायलासीन (तस्मानियन टाइगर)</span></h2>
+          <div class="sci">Thylacinus cynocephalus</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+
+          <p class="lang-en">The thylacine was a carnivorous marsupial native to Australia, Tasmania and New Guinea. Commonly known as the Tasmanian Tiger because of the dark stripes across its back, it was the largest known carnivorous marsupial of modern times. It became extinct due to human hunting, habitat destruction and other introduced threats.</p>
+
+          <p class="lang-hi">थायलासीन ऑस्ट्रेलिया, तस्मानिया और न्यू गिनी का मूल निवासी मांसाहारी धानीदार स्तनधारी था। इसकी पीठ पर बनी गहरी धारियों के कारण इसे तस्मानियन टाइगर कहा जाता था। यह आधुनिक समय का सबसे बड़ा ज्ञात मांसाहारी धानीदार जीव था। मानव द्वारा शिकार, आवास विनाश और अन्य बाहरी खतरों के कारण यह विलुप्त हो गया।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Originally found across mainland Australia, Tasmania and New Guinea. By historical times, it survived mainly on the island of Tasmania. It inhabited forests, grasslands, scrublands and open woodlands.</p>
+          <p class="lang-hi">पहले यह ऑस्ट्रेलिया के मुख्य भूभाग, तस्मानिया और न्यू गिनी में पाया जाता था। ऐतिहासिक समय तक यह मुख्य रूप से तस्मानिया द्वीप पर बचा था। इसका निवास जंगलों, घास के मैदानों, झाड़ियों और खुले वन क्षेत्रों में था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Dog-like head, elongated body and a stiff tail. Sandy yellowish-brown coat with 15–20 dark stripes across its back and hindquarters. Adults were approximately 20–30 kg in weight and had a body length of around 100–130 cm. Females had a rear-opening pouch for carrying their young.</p>
+          <p class="lang-hi">कुत्ते जैसा सिर, लंबा शरीर और कठोर पूँछ। शरीर का रंग पीला-भूरा था तथा पीठ और पिछले हिस्से पर 15–20 गहरी धारियाँ थीं। वयस्कों का वजन लगभग 20–30 किग्रा और शरीर की लंबाई लगभग 100–130 सेमी होती थी। मादाओं के पास बच्चों को रखने के लिए पीछे की ओर खुलने वाली थैली होती थी।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Carnivorous. Its diet mainly included kangaroos, wallabies, other small marsupials, rodents and birds. It was mostly active at night and hunted alone or in pairs.</p>
+          <p class="lang-hi">यह मांसाहारी था। इसके आहार में मुख्य रूप से कंगारू, वॉलबी, अन्य छोटे धानीदार जीव, कृंतक और पक्षी शामिल थे। यह अधिकतर रात में सक्रिय रहता था और अकेले या जोड़े में शिकार करता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Intensive hunting by European settlers due to the belief that thylacines killed livestock.</li>
+            <li class="lang-hi">यूरोपीय बसने वालों द्वारा यह मानकर बड़े पैमाने पर शिकार कि थायलासीन पालतू पशुओं को मारते थे।</li>
+
+            <li class="lang-en">Government and private bounty programs that rewarded people for killing thylacines.</li>
+            <li class="lang-hi">सरकारी और निजी इनाम योजनाएँ, जिनमें थायलासीन को मारने पर पैसे दिए जाते थे।</li>
+
+            <li class="lang-en">Habitat destruction and forest clearance for agriculture and farming.</li>
+            <li class="lang-hi">कृषि और खेती के लिए जंगलों की कटाई तथा प्राकृतिक आवास का विनाश।</li>
+
+            <li class="lang-en">Competition from introduced animals and possible disease outbreaks.</li>
+            <li class="lang-hi">बाहर से लाए गए जानवरों से प्रतिस्पर्धा और संभावित बीमारियों का फैलाव।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The last known thylacine died on 7 September 1936 at Beaumaris Zoo in Hobart, Tasmania. The species was officially declared extinct in 1986. Despite its tiger-like stripes, it was a marsupial, not a true tiger or a member of the cat family. Its young developed inside the mother's pouch.</p>
+          <p class="lang-hi">अंतिम ज्ञात थायलासीन की मृत्यु 7 सितंबर 1936 को तस्मानिया के होबार्ट स्थित बीयूमैरिस चिड़ियाघर में हुई थी। इस प्रजाति को 1986 में आधिकारिक रूप से विलुप्त घोषित किया गया। बाघ जैसी धारियों के बावजूद यह असली बाघ या बिल्ली परिवार का सदस्य नहीं, बल्कि एक धानीदार स्तनधारी था। इसके बच्चे माँ की थैली में विकसित होते थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>Australian Museum; National Museum of Australia; Tasmanian Parks & Wildlife Service; Department of Natural Resources and Environment Tasmania.</p>
+        </div>
+
+      </div>
+
+      <div class="sources lang-en">Population: 0 (extinct). Last known individual died on 7 September 1936. Officially declared extinct in 1986.</div>
+
+      <div class="sources lang-hi">जनसंख्या: 0 (विलुप्त)। अंतिम ज्ञात जीव की मृत्यु 7 सितंबर 1936 को हुई थी। 1986 में आधिकारिक रूप से विलुप्त घोषित किया गया।</div>
+    </article>
+
+
+  
+    <!-- PASSENGER PIGEON -->
+    <article class="detail" id="passenger-pigeon">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.nhm.ac.uk/content/dam/nhm-www/discover/passenger-pigeon/taxidermy-passenger-pigeon-two%20column.jpg')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Passenger Pigeon</span><span class="lang-hi">पैसेंजर पिजन (यात्री कबूतर)</span></h2>
+          <div class="sci">Ectopistes migratorius</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+
+          <p class="lang-en">The passenger pigeon was a wild pigeon native to North America. It was once considered the most numerous bird species in the world, with an estimated population of billions. It was famous for migrating in enormous flocks that could darken the sky for hours. Due to excessive hunting and habitat destruction, the species became extinct in 1914.</p>
+
+          <p class="lang-hi">पैसेंजर पिजन उत्तरी अमेरिका का मूल निवासी जंगली कबूतर था। कभी इसे दुनिया की सबसे अधिक संख्या वाली पक्षी प्रजातियों में माना जाता था, जिसकी अनुमानित आबादी अरबों में थी। यह विशाल झुंडों में प्रवास करने के लिए प्रसिद्ध था, जो घंटों तक आसमान को अंधेरा कर सकते थे। अत्यधिक शिकार और आवास विनाश के कारण यह प्रजाति 1914 में विलुप्त हो गई।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+
+          <p class="lang-en">Native to the eastern forests of North America, including the United States and Canada. It inhabited large deciduous forests containing oak, beech and chestnut trees. It migrated seasonally across vast distances in search of food and suitable nesting areas.</p>
+
+          <p class="lang-hi">यह संयुक्त राज्य अमेरिका और कनाडा सहित उत्तरी अमेरिका के पूर्वी जंगलों का मूल निवासी था। यह ओक, बीच और चेस्टनट के पेड़ों वाले विशाल पर्णपाती जंगलों में रहता था। भोजन और प्रजनन के लिए उपयुक्त स्थानों की तलाश में यह मौसम के अनुसार लंबी दूरी तक प्रवास करता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+
+          <p class="lang-en">Medium-sized bird with a small head, long pointed wings and a long wedge-shaped tail. Males had a bluish-grey head, reddish-orange breast and iridescent neck feathers. Females were smaller and had duller brownish-grey plumage. Adults were approximately 40–42 cm long and weighed around 250–340 grams.</p>
+
+          <p class="lang-hi">यह मध्यम आकार का पक्षी था, जिसका सिर छोटा, पंख लंबे और नुकीले तथा पूँछ लंबी और पच्चर के आकार की थी। नर का सिर नीला-भूरा, छाती लाल-नारंगी और गर्दन के पंख चमकदार होते थे। मादाएँ आकार में छोटी और भूरे-धूसर रंग की होती थीं। वयस्क पक्षियों की लंबाई लगभग 40–42 सेमी और वजन लगभग 250–340 ग्राम था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+
+          <p class="lang-en">Mainly fed on nuts, acorns, beechnuts, chestnuts, seeds and berries. It also consumed fruits and other plant materials. It often searched for food in large flocks on forest floors and in trees.</p>
+
+          <p class="lang-hi">यह मुख्य रूप से मेवे, बलूत के फल, बीच के बीज, चेस्टनट, अन्य बीज और जामुन खाता था। यह फल और अन्य वनस्पति पदार्थ भी खाता था। यह अक्सर बड़े झुंडों में जंगल की जमीन और पेड़ों पर भोजन खोजता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+
+          <ul>
+            <li class="lang-en">Massive commercial hunting for meat and feathers.</li>
+            <li class="lang-hi">मांस और पंखों के लिए बड़े पैमाने पर व्यावसायिक शिकार।</li>
+
+            <li class="lang-en">Deforestation and destruction of nesting and feeding habitats.</li>
+            <li class="lang-hi">जंगलों की कटाई और प्रजनन तथा भोजन के आवासों का विनाश।</li>
+
+            <li class="lang-en">Railroads and telegraphs made it easier for hunters to locate and exploit large nesting colonies.</li>
+            <li class="lang-hi">रेलवे और टेलीग्राफ के कारण शिकारियों के लिए बड़े प्रजनन झुंडों का पता लगाना और उनका शिकार करना आसान हो गया।</li>
+
+            <li class="lang-en">Declining flock sizes disrupted their ability to find food and reproduce successfully.</li>
+            <li class="lang-hi">झुंडों का आकार घटने से भोजन खोजने और सफलतापूर्वक प्रजनन करने की उनकी क्षमता प्रभावित हुई।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+
+          <p class="lang-en">The passenger pigeon once numbered in the billions and formed some of the largest bird flocks ever recorded. Its scientific name means "wandering migrant." The last known wild passenger pigeon was reportedly shot in Ohio in 1900. The last known individual, a female named Martha, died on 1 September 1914 at the Cincinnati Zoo. Her preserved body is kept at the Smithsonian National Museum of Natural History.</p>
+
+          <p class="lang-hi">पैसेंजर पिजन की आबादी कभी अरबों में थी और इसके झुंड इतिहास में दर्ज सबसे बड़े पक्षी झुंडों में शामिल थे। इसके वैज्ञानिक नाम का अर्थ "भटकने वाला प्रवासी" है। अंतिम ज्ञात जंगली पैसेंजर पिजन को कथित तौर पर 1900 में ओहायो में गोली मार दी गई थी। अंतिम ज्ञात पक्षी, मार्था नाम की एक मादा, की मृत्यु 1 सितंबर 1914 को सिनसिनाटी चिड़ियाघर में हुई थी। उसका संरक्षित शरीर स्मिथसोनियन नेशनल म्यूजियम ऑफ नेचुरल हिस्ट्री में रखा गया है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+
+          <p>Smithsonian National Museum of Natural History; Natural History Museum, London; Pennsylvania Game Commission; University of Colorado Museum of Natural History.</p>
+        </div>
+
+      </div>
+
+      <div class="sources lang-en">Population: 0 (extinct). Last known wild individual recorded in 1900. Last surviving individual, Martha, died on 1 September 1914.</div>
+
+      <div class="sources lang-hi">जनसंख्या: 0 (विलुप्त)। अंतिम ज्ञात जंगली पक्षी 1900 में दर्ज किया गया। अंतिम जीवित पक्षी मार्था की मृत्यु 1 सितंबर 1914 को हुई थी।</div>
+    </article>
+
+        
+    <!-- JAVAN RHINOCEROS -->
+    <article class="detail" id="javan-rhinoceros">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.wwf.id/sites/default/files/blog/_WW215199%20%281%29_13.jpg')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Javan Rhinoceros</span><span class="lang-hi">जावन गैंडा</span></h2>
+          <div class="sci">Rhinoceros sondaicus</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+
+          <p class="lang-en">The Javan rhinoceros is one of the rarest large mammals in the world. It is native to Southeast Asia and once lived across India and several parts of Southeast Asia. Today, the entire surviving wild population is restricted to Ujung Kulon National Park in Java, Indonesia. It is threatened by poaching, habitat loss and natural disasters.</p>
+
+          <p class="lang-hi">जावन गैंडा दुनिया के सबसे दुर्लभ बड़े स्तनधारियों में से एक है। यह दक्षिण-पूर्व एशिया का मूल निवासी है और पहले भारत तथा दक्षिण-पूर्व एशिया के कई क्षेत्रों में पाया जाता था। आज इसकी पूरी बची हुई जंगली आबादी इंडोनेशिया के जावा द्वीप स्थित उजुंग कुलोन राष्ट्रीय उद्यान तक सीमित है। इसे अवैध शिकार, आवास की हानि और प्राकृतिक आपदाओं से खतरा है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+
+          <p class="lang-en">Historically found across Northeast India and Southeast Asia, including Bangladesh, Myanmar, Thailand, Cambodia, Vietnam, Malaysia and Indonesia. Today, it survives only in Ujung Kulon National Park, western Java, Indonesia. It inhabits lowland tropical rainforests, dense vegetation, wetlands and muddy areas.</p>
+
+          <p class="lang-hi">ऐतिहासिक रूप से यह उत्तर-पूर्वी भारत और बांग्लादेश, म्यांमार, थाईलैंड, कंबोडिया, वियतनाम, मलेशिया तथा इंडोनेशिया सहित दक्षिण-पूर्व एशिया में पाया जाता था। आज यह केवल इंडोनेशिया के पश्चिमी जावा स्थित उजुंग कुलोन राष्ट्रीय उद्यान में जीवित है। यह निचले उष्णकटिबंधीय वर्षावनों, घनी वनस्पतियों, आर्द्रभूमियों और कीचड़ वाले क्षेत्रों में रहता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+
+          <p class="lang-en">Medium-to-large sized rhinoceros with grey, hairless skin divided into armor-like folds. It has a single short horn, usually less than 25 cm long. Females often have a very small horn or no visible horn. Adults weigh approximately 900–2,300 kg and stand around 1.5–1.7 meters tall at the shoulder. It also has a pointed, flexible upper lip for grasping vegetation.</p>
+
+          <p class="lang-hi">यह मध्यम से बड़े आकार का गैंडा है, जिसकी धूसर और बाल रहित त्वचा कवच जैसी परतों में बँटी होती है। इसके माथे पर एक छोटा सींग होता है, जिसकी लंबाई सामान्यतः 25 सेमी से कम होती है। मादाओं का सींग बहुत छोटा या कभी-कभी दिखाई नहीं देता। वयस्कों का वजन लगभग 900–2,300 किग्रा और कंधे तक ऊँचाई लगभग 1.5–1.7 मीटर होती है। इसकी ऊपरी होंठ नुकीली और लचीली होती है, जिससे यह पौधों को पकड़ सकता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+
+          <p class="lang-en">Herbivorous. It feeds on leaves, shoots, young trees, twigs, shrubs, fallen fruits and other plant materials. More than 300 plant species have been identified in its diet. Its flexible upper lip helps it pull leaves and branches from vegetation.</p>
+
+          <p class="lang-hi">यह शाकाहारी है। इसके आहार में पत्तियाँ, नई कोंपलें, छोटे पेड़, टहनियाँ, झाड़ियाँ, गिरे हुए फल और अन्य वनस्पतियाँ शामिल हैं। इसके आहार में 300 से अधिक पौधों की प्रजातियों की पहचान की गई है। इसका लचीला ऊपरी होंठ पत्तियों और टहनियों को खींचकर खाने में मदद करता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+
+          <ul>
+            <li class="lang-en">Illegal poaching for its valuable horn.</li>
+            <li class="lang-hi">इसके मूल्यवान सींग के लिए अवैध शिकार।</li>
+
+            <li class="lang-en">Historical hunting for trophies and other body parts.</li>
+            <li class="lang-hi">ऐतिहासिक रूप से ट्रॉफी और शरीर के अन्य अंगों के लिए शिकार।</li>
+
+            <li class="lang-en">Habitat destruction and degradation due to human activities.</li>
+            <li class="lang-hi">मानवीय गतिविधियों के कारण प्राकृतिक आवास का विनाश और गिरावट।</li>
+
+            <li class="lang-en">Competition from invasive plants, especially Arenga palm, reducing available food.</li>
+            <li class="lang-hi">विशेष रूप से अरेंगा पाम जैसे आक्रामक पौधों के कारण भोजन की उपलब्धता में कमी।</li>
+
+            <li class="lang-en">Natural disasters such as tsunamis and volcanic eruptions threaten its single remaining habitat.</li>
+            <li class="lang-hi">सुनामी और ज्वालामुखी विस्फोट जैसी प्राकृतिक आपदाएँ इसके एकमात्र बचे हुए आवास के लिए खतरा हैं।</li>
+
+            <li class="lang-en">Low genetic diversity, disease and inbreeding risks due to its very small population.</li>
+            <li class="lang-hi">बहुत छोटी आबादी के कारण कम आनुवंशिक विविधता, बीमारियों और अंतःप्रजनन का खतरा।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+
+          <p class="lang-en">The Javan rhinoceros is considered one of the rarest large mammals on Earth. It is closely related to the greater one-horned rhinoceros but has a smaller head and shorter horn. It is generally solitary and extremely shy. The last known Javan rhino in Vietnam was killed in 2010. According to the IUCN SSC Asian Rhino Specialist Group's February 2026 assessment, fewer than 50 individuals survive in the wild. Females usually give birth to a single calf after a gestation period of approximately 15–16 months.</p>
+
+          <p class="lang-hi">जावन गैंडे को पृथ्वी के सबसे दुर्लभ बड़े स्तनधारियों में से एक माना जाता है। यह भारतीय एक सींग वाले गैंडे का करीबी रिश्तेदार है, लेकिन इसका सिर छोटा और सींग अपेक्षाकृत छोटा होता है। यह आमतौर पर अकेला रहता है और बहुत शर्मीला होता है। वियतनाम में अंतिम ज्ञात जावन गैंडे को 2010 में मार दिया गया था। IUCN SSC एशियन राइनो स्पेशलिस्ट ग्रुप के फरवरी 2026 के आकलन के अनुसार, जंगलों में 50 से कम जीव बचे हैं। मादा लगभग 15–16 महीने के गर्भकाल के बाद सामान्यतः एक बच्चे को जन्म देती है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+
+          <p>WWF; International Rhino Foundation; IUCN SSC Asian Rhino Specialist Group; IUCN Red List.</p>
+        </div>
+
+      </div>
+
+      <div class="sources lang-en">Population: Fewer than 50 individuals (2026 assessment). Distribution: Ujung Kulon National Park, Java, Indonesia. Conservation status: Critically Endangered (CR).</div>
+
+      <div class="sources lang-hi">जनसंख्या: 50 से कम जीव (2026 का आकलन)। वितरण: उजुंग कुलोन राष्ट्रीय उद्यान, जावा, इंडोनेशिया। संरक्षण स्थिति: गंभीर रूप से संकटग्रस्त (CR)।</div>
+    </article>
+
+       
+
+        
+    <!-- SUMATRAN ORANGUTAN -->
+    <article class="detail" id="sumatran-orangutan">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://earth.org/wp-content/uploads/2021/05/rsz_orang-utan-3534153_1280.jpg')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Sumatran Orangutan</span><span class="lang-hi">सुमात्राई ओरंगुटान</span></h2>
+          <div class="sci">Pongo abelii</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+
+          <p class="lang-en">The Sumatran orangutan is a great ape native to the island of Sumatra in Indonesia. It is one of the rarest and most intelligent primates in the world. Known for its long reddish-orange hair, powerful arms and remarkable ability to use tools, it spends most of its life in trees. Habitat destruction, illegal hunting and human activities have caused its population to decline significantly.</p>
+
+          <p class="lang-hi">सुमात्राई ओरंगुटान इंडोनेशिया के सुमात्रा द्वीप का मूल निवासी एक विशाल कपि है। यह दुनिया के सबसे दुर्लभ और बुद्धिमान प्राइमेट्स में से एक है। अपने लंबे लाल-नारंगी बालों, शक्तिशाली भुजाओं और औजारों का उपयोग करने की अद्भुत क्षमता के लिए प्रसिद्ध यह अपना अधिकांश जीवन पेड़ों पर बिताता है। आवास विनाश, अवैध शिकार और मानवीय गतिविधियों के कारण इसकी आबादी में काफी गिरावट आई है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+
+          <p class="lang-en">Found exclusively on the Indonesian island of Sumatra. Its main habitats include tropical rainforests, lowland forests, peat-swamp forests and mountain forests. Important populations survive in the Leuser Ecosystem and other protected forest areas in northern Sumatra.</p>
+
+          <p class="lang-hi">यह केवल इंडोनेशिया के सुमात्रा द्वीप पर पाया जाता है। इसके प्रमुख आवासों में उष्णकटिबंधीय वर्षावन, निचले क्षेत्र के जंगल, पीट-दलदली वन और पहाड़ी जंगल शामिल हैं। इसकी महत्वपूर्ण आबादी लेउसर पारिस्थितिकी तंत्र और उत्तरी सुमात्रा के अन्य संरक्षित वन क्षेत्रों में पाई जाती है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+
+          <p class="lang-en">Covered with long, shaggy reddish-orange hair. It has very long and powerful arms, grasping hands and feet, a broad face and no tail. Adult males may develop large cheek pads called flanges and a throat pouch. Adults weigh approximately 30–90 kg, with males generally larger than females. Their arms are specially adapted for climbing and swinging through trees.</p>
+
+          <p class="lang-hi">इसका शरीर लंबे और घने लाल-नारंगी बालों से ढका होता है। इसकी भुजाएँ बहुत लंबी और शक्तिशाली होती हैं तथा हाथ-पैर पकड़ने के लिए अनुकूलित होते हैं। इसका चेहरा चौड़ा होता है और पूँछ नहीं होती। वयस्क नर के गालों के पास बड़े मांसल उभार विकसित हो सकते हैं, जिन्हें फ्लैंज कहा जाता है, साथ ही गले में एक थैली भी होती है। वयस्कों का वजन लगभग 30–90 किग्रा होता है और नर सामान्यतः मादाओं से बड़े होते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+
+          <p class="lang-en">Primarily frugivorous, feeding mainly on wild fruits such as figs, durian and other tropical fruits. It also eats leaves, flowers, bark, seeds, insects, termites and occasionally small animals. It plays an important ecological role by dispersing seeds throughout the rainforest.</p>
+
+          <p class="lang-hi">यह मुख्य रूप से फलाहारी है और अंजीर, ड्यूरियन तथा अन्य उष्णकटिबंधीय जंगली फल खाता है। इसके आहार में पत्तियाँ, फूल, पेड़ों की छाल, बीज, कीड़े, दीमक और कभी-कभी छोटे जानवर भी शामिल होते हैं। यह वर्षावनों में बीजों का प्रसार करके पारिस्थितिकी तंत्र में महत्वपूर्ण भूमिका निभाता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+
+          <ul>
+            <li class="lang-en">Deforestation for palm oil plantations, agriculture and commercial development.</li>
+            <li class="lang-hi">पाम ऑयल के बागानों, कृषि और व्यावसायिक विकास के लिए जंगलों की कटाई।</li>
+
+            <li class="lang-en">Illegal logging and destruction of natural rainforest habitats.</li>
+            <li class="lang-hi">अवैध लकड़ी कटाई और प्राकृतिक वर्षावनों का विनाश।</li>
+
+            <li class="lang-en">Poaching and killing of adults, especially females, for the illegal pet trade.</li>
+            <li class="lang-hi">अवैध पालतू पशु व्यापार के लिए शिकार और विशेष रूप से मादा ओरंगुटान की हत्या।</li>
+
+            <li class="lang-en">Forest fires and climate-related environmental changes.</li>
+            <li class="lang-hi">जंगलों में आग और जलवायु से संबंधित पर्यावरणीय परिवर्तन।</li>
+
+            <li class="lang-en">Habitat fragmentation due to roads, plantations and human settlements.</li>
+            <li class="lang-hi">सड़कों, बागानों और मानव बस्तियों के कारण प्राकृतिक आवास का विभाजन।</li>
+
+            <li class="lang-en">Slow reproduction rate, making population recovery extremely difficult.</li>
+            <li class="lang-hi">धीमी प्रजनन दर, जिसके कारण आबादी को दोबारा बढ़ाना बेहद कठिन है।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+
+          <p class="lang-en">The Sumatran orangutan is one of the most intelligent non-human primates and can use sticks and leaves as tools. It is highly arboreal and spends most of its life in trees. Mothers usually give birth to a single infant and care for it for several years. The interval between births is approximately 8–9 years, one of the longest among mammals. A 2021–2023 population survey estimated approximately 11,694 Sumatran orangutans in the wild. The species is officially classified as Critically Endangered by the IUCN.</p>
+
+          <p class="lang-hi">सुमात्राई ओरंगुटान सबसे बुद्धिमान गैर-मानव प्राइमेट्स में से एक है और यह लकड़ी की छोटी टहनियों तथा पत्तियों का उपयोग औजारों के रूप में कर सकता है। यह पेड़ों पर रहने वाला जीव है और अपना अधिकांश जीवन पेड़ों पर बिताता है। मादा सामान्यतः एक बच्चे को जन्म देती है और कई वर्षों तक उसकी देखभाल करती है। दो बच्चों के जन्म के बीच लगभग 8–9 वर्षों का अंतर होता है, जो स्तनधारियों में सबसे लंबे अंतरालों में से एक है। 2021–2023 के जनसंख्या सर्वेक्षण में जंगलों में लगभग 11,694 सुमात्राई ओरंगुटान होने का अनुमान लगाया गया। IUCN ने इसे आधिकारिक रूप से गंभीर रूप से संकटग्रस्त घोषित किया है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+
+          <p>IUCN Red List; World Wildlife Fund (WWF); International Union for Conservation of Nature; Indonesian Ministry of Forestry; Animal Diversity Web.</p>
+        </div>
+
+      </div>
+
+      <div class="sources lang-en">Population: Approximately 11,694 individuals (2021–2023 survey estimate). Distribution: Sumatra, Indonesia. Conservation status: Critically Endangered (CR). Population trend: Decreasing.</div>
+
+      <div class="sources lang-hi">जनसंख्या: लगभग 11,694 जीव (2021–2023 सर्वेक्षण का अनुमान)। वितरण: सुमात्रा, इंडोनेशिया। संरक्षण स्थिति: गंभीर रूप से संकटग्रस्त (CR)। जनसंख्या का रुझान: घटता हुआ।</div>
+    </article>
+
+        
+    <!-- BENGAL TIGER -->
+    <article class="detail" id="bengal-tiger">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://c02.purpledshub.com/uploads/sites/62/2019/08/GettyImages-558172747-843cb41.jpg?w=1200&webp=1')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Bengal Tiger (Royal Bengal Tiger)</span><span class="lang-hi">बंगाल टाइगर (रॉयल बंगाल टाइगर)</span></h2>
+          <div class="sci">Panthera tigris tigris</div>
+          <span class="status-pill badge-en">Endangered (EN)</span>
+
+          <p class="lang-en">The Bengal tiger, also known as the Royal Bengal Tiger, is one of the largest and most powerful wild cats in the world. It is native to the Indian subcontinent and is India's national animal. Famous for its orange coat with black stripes, it is an apex predator that plays a vital role in maintaining ecological balance. Poaching, habitat destruction and human-wildlife conflict threaten its survival.</p>
+
+          <p class="lang-hi">बंगाल टाइगर, जिसे रॉयल बंगाल टाइगर भी कहा जाता है, दुनिया की सबसे बड़ी और शक्तिशाली जंगली बिल्लियों में से एक है। यह भारतीय उपमहाद्वीप का मूल निवासी है और भारत का राष्ट्रीय पशु है। काले रंग की धारियों वाले नारंगी शरीर के लिए प्रसिद्ध यह एक शीर्ष शिकारी है, जो पारिस्थितिक संतुलन बनाए रखने में महत्वपूर्ण भूमिका निभाता है। अवैध शिकार, आवास विनाश और मानव-वन्यजीव संघर्ष इसके अस्तित्व के लिए खतरा हैं।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+
+          <p class="lang-en">Found mainly in India, Bangladesh, Nepal and Bhutan, with historical distribution across much of the Indian subcontinent. It inhabits tropical rainforests, dry deciduous forests, grasslands, mangroves and Himalayan foothill forests. Important habitats include the Sundarbans, Ranthambore, Jim Corbett, Kaziranga and Bandhavgarh National Parks.</p>
+
+          <p class="lang-hi">यह मुख्य रूप से भारत, बांग्लादेश, नेपाल और भूटान में पाया जाता है। ऐतिहासिक रूप से इसका वितरण भारतीय उपमहाद्वीप के बड़े हिस्से में था। यह उष्णकटिबंधीय वर्षावनों, शुष्क पर्णपाती जंगलों, घास के मैदानों, मैंग्रोव वनों और हिमालय की तलहटी के जंगलों में रहता है। सुंदरबन, रणथंभौर, जिम कॉर्बेट, काजीरंगा और बांधवगढ़ इसके महत्वपूर्ण आवास हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+
+          <p class="lang-en">Large, muscular body covered with orange-yellow fur and distinctive black stripes. The belly, chest and inner legs are generally white. Adult males usually weigh around 180–260 kg, while females weigh approximately 100–160 kg. Males can reach around 2.7–3.1 meters in total length, including the tail. It has powerful jaws, sharp retractable claws, strong legs and excellent night vision. Each tiger has a unique stripe pattern.</p>
+
+          <p class="lang-hi">इसका शरीर बड़ा और मांसल होता है, जिस पर नारंगी-पीले रंग के फर और विशिष्ट काली धारियाँ होती हैं। पेट, छाती और पैरों का अंदरूनी हिस्सा सामान्यतः सफेद होता है। वयस्क नर का वजन लगभग 180–260 किग्रा और मादा का वजन लगभग 100–160 किग्रा होता है। पूँछ सहित नर की कुल लंबाई लगभग 2.7–3.1 मीटर तक हो सकती है। इसके जबड़े शक्तिशाली, पंजे नुकीले और पीछे खींचे जा सकने वाले होते हैं। इसकी रात में देखने की क्षमता भी बहुत अच्छी होती है। प्रत्येक बाघ की धारियों का पैटर्न अलग होता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+
+          <p class="lang-en">Strictly carnivorous. Its diet mainly includes deer, sambar, chital, wild boar, gaur and other medium-to-large mammals. It may occasionally hunt smaller animals, monkeys and birds. Tigers are solitary ambush hunters that rely on stealth, strength and powerful bites to capture their prey.</p>
+
+          <p class="lang-hi">यह पूरी तरह मांसाहारी है। इसके आहार में मुख्य रूप से हिरण, सांभर, चीतल, जंगली सूअर, गौर और अन्य मध्यम से बड़े स्तनधारी शामिल हैं। कभी-कभी यह छोटे जानवरों, बंदरों और पक्षियों का भी शिकार करता है। बाघ अकेले घात लगाकर शिकार करते हैं और अपने शिकार को पकड़ने के लिए छिपने की क्षमता, ताकत तथा शक्तिशाली काटने का उपयोग करते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+
+          <ul>
+            <li class="lang-en">Illegal poaching for skin, bones, teeth and other body parts.</li>
+            <li class="lang-hi">खाल, हड्डियों, दाँतों और शरीर के अन्य अंगों के लिए अवैध शिकार।</li>
+
+            <li class="lang-en">Deforestation and destruction of natural habitats for agriculture and development.</li>
+            <li class="lang-hi">कृषि और विकास के लिए जंगलों की कटाई तथा प्राकृतिक आवास का विनाश।</li>
+
+            <li class="lang-en">Habitat fragmentation caused by roads, railways and human settlements.</li>
+            <li class="lang-hi">सड़कों, रेलवे और मानव बस्तियों के कारण प्राकृतिक आवास का विभाजन।</li>
+
+            <li class="lang-en">Human-tiger conflict due to competition for land and resources.</li>
+            <li class="lang-hi">भूमि और संसाधनों के लिए प्रतिस्पर्धा के कारण मानव-बाघ संघर्ष।</li>
+
+            <li class="lang-en">Decline in natural prey populations due to hunting and habitat degradation.</li>
+            <li class="lang-hi">शिकार और आवास की गिरावट के कारण प्राकृतिक शिकार प्रजातियों की संख्या में कमी।</li>
+
+            <li class="lang-en">Climate change and rising sea levels threaten low-lying habitats such as the Sundarbans.</li>
+            <li class="lang-hi">जलवायु परिवर्तन और समुद्र के बढ़ते जलस्तर से सुंदरबन जैसे निचले क्षेत्रों के आवासों को खतरा।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+
+          <p class="lang-en">The Bengal tiger is India's national animal and one of the most recognizable wild cats in the world. It is an excellent swimmer and can cross rivers and water channels with ease. Unlike lions, tigers generally live solitary lives and maintain individual territories. A female usually gives birth to 2–4 cubs after a gestation period of approximately 100–110 days. Cubs remain dependent on their mother for around 18–24 months. India recorded an estimated 3,652 wild tigers in the 2022 national assessment, although this figure includes the country's tiger population rather than a separate Bengal tiger count.</p>
+
+          <p class="lang-hi">बंगाल टाइगर भारत का राष्ट्रीय पशु है और दुनिया की सबसे प्रसिद्ध जंगली बिल्लियों में से एक है। यह बहुत अच्छा तैराक होता है और नदियों तथा जलमार्गों को आसानी से पार कर सकता है। शेरों के विपरीत बाघ सामान्यतः अकेले रहते हैं और अपना अलग क्षेत्र बनाते हैं। मादा लगभग 100–110 दिनों के गर्भकाल के बाद सामान्यतः 2–4 शावकों को जन्म देती है। शावक लगभग 18–24 महीनों तक अपनी माँ पर निर्भर रहते हैं। भारत की 2022 की राष्ट्रीय गणना में लगभग 3,652 जंगली बाघों का अनुमान लगाया गया था। यह संख्या भारत की कुल बाघ आबादी की है, केवल बंगाल टाइगर की अलग गणना नहीं है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+
+          <p>National Tiger Conservation Authority (NTCA); IUCN Red List; World Wildlife Fund (WWF); National Geographic; Wildlife Institute of India.</p>
+        </div>
+
+      </div>
+
+      <div class="sources lang-en">Population: India's estimated wild tiger population was 3,652 in the 2022 assessment (all tiger populations in India). Conservation status: Endangered (EN). Population trend: Decreasing globally.</div>
+
+      <div class="sources lang-hi">जनसंख्या: भारत में 2022 की गणना के अनुसार लगभग 3,652 जंगली बाघ (भारत की सभी बाघ आबादियाँ)। संरक्षण स्थिति: संकटग्रस्त (EN)। वैश्विक जनसंख्या का रुझान: घटता हुआ।</div>
+    </article>
+
+
+        
+    <!-- ASIAN ELEPHANT -->
+    <article class="detail" id="asian-elephant">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/9/98/Elephas_maximus_%28Bandipur%29.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Asian Elephant</span><span class="lang-hi">एशियाई हाथी</span></h2>
+          <div class="sci">Elephas maximus</div>
+          <span class="status-pill badge-en">Endangered (EN)</span>
+          <p class="lang-en">The Asian Elephant is the largest land mammal in Asia. It is an intelligent and social animal known for its strong memory, long trunk, and important role in maintaining forest ecosystems. Its wild population is declining due to habitat loss, fragmentation, and human-elephant conflict.</p>
+          <p class="lang-hi">एशियाई हाथी एशिया का सबसे बड़ा स्थलीय स्तनधारी जीव है। यह अपनी बुद्धिमत्ता, मजबूत याददाश्त, लंबी सूँड़ और सामाजिक व्यवहार के लिए जाना जाता है। यह जंगलों के पारिस्थितिकी तंत्र को बनाए रखने में महत्वपूर्ण भूमिका निभाता है। आवास की हानि, जंगलों के विभाजन और मानव-हाथी संघर्ष के कारण इसकी जंगली आबादी घट रही है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Asian elephants live in tropical and subtropical forests, grasslands, and wetlands. They are found in India, Sri Lanka, Nepal, Bhutan, Bangladesh, Myanmar, Thailand, Cambodia, Laos, Vietnam, Malaysia, Indonesia, and parts of China.</p>
+          <p class="lang-hi">एशियाई हाथी उष्णकटिबंधीय और उपोष्णकटिबंधीय जंगलों, घास के मैदानों तथा आर्द्रभूमियों में रहते हैं। ये भारत, श्रीलंका, नेपाल, भूटान, बांग्लादेश, म्यांमार, थाईलैंड, कंबोडिया, लाओस, वियतनाम, मलेशिया, इंडोनेशिया और चीन के कुछ क्षेत्रों में पाए जाते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Asian elephants have smaller ears than African elephants, a rounded back, and a single finger-like tip at the end of their trunk. Adults usually stand about 2–3.5 metres tall at the shoulder. Males are generally larger than females, and prominent tusks are usually found in males.</p>
+          <p class="lang-hi">एशियाई हाथियों के कान अफ्रीकी हाथियों की तुलना में छोटे होते हैं। इनकी पीठ गोलाकार होती है और सूँड़ के अंतिम सिरे पर उँगली जैसी एक संरचना होती है। वयस्क हाथियों की कंधे तक ऊँचाई सामान्यतः लगभग 2–3.5 मीटर होती है। नर हाथी आमतौर पर मादाओं से बड़े होते हैं और लंबे दाँत मुख्य रूप से नर हाथियों में पाए जाते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Asian elephants are herbivores. They eat grasses, leaves, bark, roots, fruits, bamboo, and branches. They spend many hours each day feeding and require large amounts of food and water.</p>
+          <p class="lang-hi">एशियाई हाथी शाकाहारी होते हैं। ये घास, पत्तियाँ, पेड़ों की छाल, जड़ें, फल, बाँस और टहनियाँ खाते हैं। इन्हें प्रतिदिन कई घंटे भोजन करने में बिताने पड़ते हैं और बड़ी मात्रा में भोजन तथा पानी की आवश्यकता होती है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Deforestation and destruction of natural habitats.</li>
+            <li class="lang-hi">वनों की कटाई और प्राकृतिक आवासों का नष्ट होना।</li>
+            <li class="lang-en">Fragmentation of forests by roads, railways, and settlements.</li>
+            <li class="lang-hi">सड़कों, रेलवे और बस्तियों के कारण जंगलों का विभाजित होना।</li>
+            <li class="lang-en">Human-elephant conflict, especially when elephants enter farms and villages.</li>
+            <li class="lang-hi">मानव-हाथी संघर्ष, विशेषकर जब हाथी खेतों और गाँवों में प्रवेश करते हैं।</li>
+            <li class="lang-en">Illegal killing and poaching for ivory and other body parts.</li>
+            <li class="lang-hi">हाथीदाँत और शरीर के अन्य अंगों के लिए अवैध शिकार।</li>
+            <li class="lang-en">Declining habitat quality and reduced access to food and water.</li>
+            <li class="lang-hi">आवास की गुणवत्ता में गिरावट तथा भोजन और पानी की उपलब्धता कम होना।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Asian elephants can live for around 60 years in the wild. Their trunks contain thousands of muscles and are used for breathing, smelling, drinking, feeding, and communication. They help forests by dispersing seeds through their dung. Their gestation period is about 22 months, one of the longest among mammals.</p>
+          <p class="lang-hi">एशियाई हाथी जंगलों में लगभग 60 वर्ष तक जीवित रह सकते हैं। उनकी सूँड़ में हजारों मांसपेशियाँ होती हैं और इसका उपयोग साँस लेने, सूँघने, पानी पीने, भोजन उठाने तथा संवाद करने में होता है। वे अपने मल के माध्यम से बीजों को फैलाकर जंगलों के विकास में मदद करते हैं। इनका गर्भकाल लगभग 22 महीने का होता है, जो स्तनधारियों में सबसे लंबे गर्भकालों में से एक है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.iucnredlist.org/species/7140/45818198" target="_blank">IUCN Red List</a><br>
+            <a href="https://www.worldwildlife.org/species/asian-elephant" target="_blank">World Wildlife Fund (WWF)</a><br>
+            <a href="https://www.fws.gov/species/asian-elephant-elephas-maximus" target="_blank">U.S. Fish & Wildlife Service</a><br>
+            <a href="https://commons.wikimedia.org/wiki/File:Asian_Elephant_tusker_03.jpg" target="_blank">Image: Wikimedia Commons</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Endangered (EN) — IUCN Red List.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> संकटग्रस्त (EN) — IUCN रेड लिस्ट।
+      </div>
+    </article>
+
+
+    <!-- SNOW LEOPARD -->
+    <article class="detail" id="snow-leopard">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.welshmountainzoo.org/wp-content/uploads/2025/03/Snow-.png')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Snow Leopard</span><span class="lang-hi">हिम तेंदुआ</span></h2>
+          <div class="sci">Panthera uncia</div>
+          <span class="status-pill badge-vu">Vulnerable (VU)</span>
+          <p class="lang-en">The Snow Leopard, also known as the "Ghost of the Mountains," is a rare wild cat found in the high mountains of Central and South Asia. It is famous for its beautiful thick fur, long bushy tail, and ability to survive in extremely cold and rugged environments. It is an important predator that helps maintain the balance of mountain ecosystems.</p>
+          <p class="lang-hi">हिम तेंदुआ, जिसे "पहाड़ों का भूत" भी कहा जाता है, मध्य और दक्षिण एशिया के ऊँचे पहाड़ों में पाया जाने वाला एक दुर्लभ जंगली बिल्ली प्रजाति का जीव है। यह अपने सुंदर घने फर, लंबी झबरीली पूँछ और अत्यधिक ठंडे तथा दुर्गम वातावरण में जीवित रहने की क्षमता के लिए प्रसिद्ध है। यह एक महत्वपूर्ण शिकारी है जो पर्वतीय पारिस्थितिकी तंत्र का संतुलन बनाए रखने में मदद करता है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Snow leopards inhabit high-altitude mountain ranges, rocky cliffs, alpine meadows, and cold deserts. They are found across 12 countries, including India, Nepal, Bhutan, China, Pakistan, Afghanistan, Mongolia, and Russia. In India, they mainly live in the Himalayan and Trans-Himalayan regions, including Ladakh, Himachal Pradesh, Uttarakhand, Sikkim, and Arunachal Pradesh.</p>
+          <p class="lang-hi">हिम तेंदुए ऊँचे पर्वतीय क्षेत्रों, चट्टानी ढलानों, अल्पाइन घास के मैदानों और ठंडे रेगिस्तानी इलाकों में रहते हैं। ये भारत, नेपाल, भूटान, चीन, पाकिस्तान, अफगानिस्तान, मंगोलिया और रूस सहित 12 देशों में पाए जाते हैं। भारत में ये मुख्य रूप से हिमालय और ट्रांस-हिमालयी क्षेत्रों जैसे लद्दाख, हिमाचल प्रदेश, उत्तराखंड, सिक्किम और अरुणाचल प्रदेश में रहते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Snow leopards have thick grey-white fur covered with dark spots and rosettes that provide excellent camouflage. Their bodies are about 90–120 cm long, with a very long bushy tail measuring around 80–100 cm. Their large paws act like snowshoes, while their thick tail helps them balance on steep slopes and keeps them warm when resting.</p>
+          <p class="lang-hi">हिम तेंदुओं का शरीर घने सफेद-धूसर फर से ढका होता है, जिस पर गहरे रंग के धब्बे और गोलाकार निशान होते हैं। इनके शरीर की लंबाई लगभग 90–120 सेंटीमीटर होती है और इनकी झबरीली पूँछ लगभग 80–100 सेंटीमीटर लंबी होती है। इनके बड़े पंजे बर्फ पर चलने में मदद करते हैं, जबकि मोटी पूँछ खड़ी ढलानों पर संतुलन बनाए रखने और आराम करते समय शरीर को गर्म रखने में सहायक होती है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Snow leopards are carnivores. Their main prey includes Himalayan blue sheep (bharal), ibex, argali, and other mountain animals. They may also hunt marmots, hares, rodents, and birds. They are powerful hunters capable of bringing down prey much larger than themselves.</p>
+          <p class="lang-hi">हिम तेंदुए मांसाहारी होते हैं। इनके मुख्य शिकार में हिमालयी नीली भेड़ (भरल), आइबेक्स, अर्गली और अन्य पर्वतीय जानवर शामिल हैं। ये मर्मोट, खरगोश, छोटे कृंतक और पक्षियों का भी शिकार करते हैं। ये शक्तिशाली शिकारी होते हैं और अपने से बड़े जानवरों का भी शिकार कर सकते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Habitat loss and fragmentation due to roads, mining, and development.</li>
+            <li class="lang-hi">सड़कों, खनन और विकास कार्यों के कारण आवास का नष्ट होना और विभाजित होना।</li>
+            <li class="lang-en">Poaching and illegal wildlife trade for fur, bones, and other body parts.</li>
+            <li class="lang-hi">फर, हड्डियों और शरीर के अन्य अंगों के लिए अवैध शिकार और वन्यजीव व्यापार।</li>
+            <li class="lang-en">Decline in natural prey populations due to hunting and competition with livestock.</li>
+            <li class="lang-hi">शिकार और पालतू पशुओं के साथ प्रतिस्पर्धा के कारण प्राकृतिक शिकार की संख्या में कमी।</li>
+            <li class="lang-en">Retaliatory killing by herders when snow leopards attack livestock.</li>
+            <li class="lang-hi">पशुधन पर हमले के बाद चरवाहों द्वारा बदले में हिम तेंदुओं को मारना।</li>
+            <li class="lang-en">Climate change affecting mountain habitats and prey availability.</li>
+            <li class="lang-hi">जलवायु परिवर्तन के कारण पर्वतीय आवासों और शिकार की उपलब्धता पर प्रभाव।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Snow leopards cannot roar like lions and tigers. They communicate through sounds such as chuffing, growling, and yowling. Their long tails help them balance while jumping across rocky cliffs. They can leap up to around 15 metres in a single bound. They are solitary animals and are most active during dawn and dusk.</p>
+          <p class="lang-hi">हिम तेंदुए शेर और बाघ की तरह दहाड़ नहीं सकते। वे फुफकारने, गुर्राने और आवाजें निकालने के माध्यम से संवाद करते हैं। इनकी लंबी पूँछ चट्टानों के बीच छलांग लगाते समय संतुलन बनाए रखने में मदद करती है। ये एक छलांग में लगभग 15 मीटर तक कूद सकते हैं। ये अकेले रहने वाले जीव हैं और सुबह तथा शाम के समय अधिक सक्रिय होते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.catsg.org/living-species-snowleopard" target="_blank">IUCN Cat Specialist Group</a><br>
+            <a href="https://www.worldwildlife.org/species/snow-leopard/" target="_blank">World Wildlife Fund (WWF)</a><br>
+            <a href="https://www.un.org/en/observances/snow-leopard-day" target="_blank">United Nations</a><br>
+            <a href="https://commons.wikimedia.org/wiki/File:Snow_leopard_in_snow_2.jpg" target="_blank">Image: Wikimedia Commons</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Vulnerable (VU) — IUCN Red List.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> असुरक्षित (VU) — IUCN रेड लिस्ट।
+      </div>
+    </article>
+
+
+        
+    <!-- BLUE WHALE -->
+    <article class="detail" id="blue-whale">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.antarctica.gov.au/site/assets/files/45670/ia40342.1200x0.jpg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Blue Whale</span><span class="lang-hi">नीली व्हेल</span></h2>
+          <div class="sci">Balaenoptera musculus</div>
+          <span class="status-pill badge-en">Endangered (EN)</span>
+          <p class="lang-en">The Blue Whale is the largest animal ever known to have lived on Earth. This magnificent marine mammal is famous for its enormous size, blue-grey body, and powerful tail. Despite its gigantic appearance, it feeds mainly on tiny shrimp-like animals called krill. Blue whales are endangered due to their history of commercial whaling and continuing threats from human activities in the oceans.</p>
+          <p class="lang-hi">नीली व्हेल पृथ्वी पर अब तक ज्ञात सबसे बड़ा जीव है। यह विशाल समुद्री स्तनधारी अपने बहुत बड़े शरीर, नीले-धूसर रंग और शक्तिशाली पूँछ के लिए प्रसिद्ध है। अपने विशाल आकार के बावजूद, यह मुख्य रूप से क्रिल नामक छोटे झींगा जैसे जीवों को खाती है। अत्यधिक व्यावसायिक शिकार और समुद्र में मानवीय गतिविधियों से उत्पन्न खतरों के कारण यह संकटग्रस्त है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Blue whales are found in oceans around the world, except the Arctic Ocean. They usually migrate between colder waters, where they feed on abundant krill, and warmer waters, where they breed and give birth. They inhabit the Atlantic, Pacific, Indian, and Southern Oceans. In the Indian Ocean, blue whales can be found in regions around Sri Lanka and other parts of the northern Indian Ocean.</p>
+          <p class="lang-hi">नीली व्हेल आर्कटिक महासागर को छोड़कर दुनिया के लगभग सभी महासागरों में पाई जाती हैं। ये सामान्यतः ठंडे पानी वाले क्षेत्रों में भोजन करती हैं, जहाँ क्रिल प्रचुर मात्रा में मिलता है, और प्रजनन तथा बच्चों को जन्म देने के लिए गर्म पानी वाले क्षेत्रों की ओर प्रवास करती हैं। ये अटलांटिक, प्रशांत, हिंद और दक्षिणी महासागरों में पाई जाती हैं। हिंद महासागर में ये श्रीलंका के आसपास और उत्तरी हिंद महासागर के अन्य क्षेत्रों में देखी जाती हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Blue whales can grow up to about 30 metres long, with some individuals reaching around 33 metres. They may weigh approximately 150–200 tonnes or more. Their bodies are long and streamlined, with mottled blue-grey skin and a broad U-shaped head. Instead of teeth, they have baleen plates that help filter food from seawater. Females are generally larger than males.</p>
+          <p class="lang-hi">नीली व्हेल की लंबाई लगभग 30 मीटर तक हो सकती है और कुछ व्हेल लगभग 33 मीटर तक लंबी होती हैं। इनका वजन लगभग 150–200 टन या उससे अधिक हो सकता है। इनका शरीर लंबा और सुव्यवस्थित होता है तथा त्वचा नीले-धूसर रंग की होती है। इनका सिर चौड़ा और U-आकार का होता है। दाँतों के स्थान पर इनके मुँह में बेलीन प्लेटें होती हैं, जो समुद्र के पानी से भोजन छानने में मदद करती हैं। मादाएँ सामान्यतः नर से बड़ी होती हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Blue whales are carnivores and feed almost entirely on krill, which are tiny shrimp-like crustaceans. They take in huge amounts of seawater and filter the krill through their baleen plates. During feeding seasons, a large blue whale may consume several tonnes of krill in a single day.</p>
+          <p class="lang-hi">नीली व्हेल मांसाहारी होती हैं और लगभग पूरी तरह क्रिल पर निर्भर रहती हैं। क्रिल छोटे झींगा जैसे समुद्री जीव होते हैं। ये बड़ी मात्रा में समुद्री पानी अपने मुँह में लेती हैं और बेलीन प्लेटों की मदद से क्रिल को छानकर खाती हैं। भोजन के मौसम में एक बड़ी नीली व्हेल एक दिन में कई टन क्रिल खा सकती है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Commercial whaling in the past drastically reduced blue whale populations.</li>
+            <li class="lang-hi">अतीत में व्यावसायिक शिकार के कारण नीली व्हेल की आबादी में भारी कमी आई।</li>
+            <li class="lang-en">Collisions with large ships can cause serious injuries or death.</li>
+            <li class="lang-hi">बड़े जहाजों से टकराने के कारण गंभीर चोट या मृत्यु हो सकती है।</li>
+            <li class="lang-en">Entanglement in fishing nets and other fishing equipment.</li>
+            <li class="lang-hi">मछली पकड़ने के जाल और अन्य उपकरणों में फँस जाना।</li>
+            <li class="lang-en">Ocean noise from ships and industrial activities can disturb their communication.</li>
+            <li class="lang-hi">जहाजों और औद्योगिक गतिविधियों से होने वाला समुद्री शोर इनके संवाद को प्रभावित कर सकता है।</li>
+            <li class="lang-en">Climate change may affect krill populations and their availability as food.</li>
+            <li class="lang-hi">जलवायु परिवर्तन के कारण क्रिल की आबादी और भोजन के रूप में उनकी उपलब्धता प्रभावित हो सकती है।</li>
+            <li class="lang-en">Marine pollution and degradation of ocean habitats.</li>
+            <li class="lang-hi">समुद्री प्रदूषण और महासागरीय आवासों का खराब होना।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The blue whale is the largest animal ever known to have existed, even larger than the biggest dinosaurs. Its heart can weigh around 180 kilograms. Blue whales communicate through very low-frequency sounds that can travel long distances underwater. They breathe air through blowholes on top of their heads and must come to the surface regularly. Their lifespan is estimated to be around 80–90 years.</p>
+          <p class="lang-hi">नीली व्हेल अब तक ज्ञात सबसे बड़ा जीव है और यह सबसे बड़े डायनासोरों से भी विशाल होती है। इसका हृदय लगभग 180 किलोग्राम तक वजन का हो सकता है। नीली व्हेल बहुत कम आवृत्ति वाली ध्वनियों के माध्यम से संवाद करती हैं, जो पानी के अंदर लंबी दूरी तक जा सकती हैं। ये अपने सिर के ऊपर स्थित श्वास छिद्रों से हवा लेती हैं और नियमित रूप से पानी की सतह पर आती हैं। इनका अनुमानित जीवनकाल लगभग 80–90 वर्ष होता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.iucnredlist.org/" target="_blank">IUCN Red List</a><br>
+            <a href="https://www.fisheries.noaa.gov/species/blue-whale" target="_blank">NOAA Fisheries</a><br>
+            <a href="https://iwc.int/about-whales/whale-species/blue-whale" target="_blank">International Whaling Commission</a><br>
+            <a href="https://www.worldwildlife.org/species/whale/blue-whale/" target="_blank">World Wildlife Fund (WWF)</a><br>
+            <a href="https://www.antarctica.gov.au/about-antarctica/animals/whales/blue-whale/" target="_blank">Australian Antarctic Program — Image Source</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Endangered (EN) — IUCN Red List.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> संकटग्रस्त (EN) — IUCN रेड लिस्ट।
+      </div>
+    </article>
+
+
+        
+    <!-- RED PANDA -->
+    <article class="detail" id="red-panda">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://www.loroparque.com/app/uploads/2022/06/pandas-rojos-min.jpg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Red Panda</span><span class="lang-hi">लाल पांडा</span></h2>
+          <div class="sci">Ailurus fulgens</div>
+          <span class="status-pill badge-en">Endangered (EN)</span>
+          <p class="lang-en">The Red Panda is a small, adorable mammal famous for its reddish-brown fur, fluffy ringed tail, and cute facial markings. Despite its name, it is not closely related to the Giant Panda. It spends much of its life in trees and is an excellent climber. Red pandas are found in the Eastern Himalayan forests and are threatened by habitat loss, poaching, and forest fragmentation.</p>
+          <p class="lang-hi">लाल पांडा एक छोटा और बेहद प्यारा स्तनधारी जीव है, जो अपने लाल-भूरे फर, घनी छल्लेदार पूँछ और सुंदर चेहरे के निशानों के लिए प्रसिद्ध है। अपने नाम के बावजूद इसका विशाल पांडा से निकट संबंध नहीं है। यह अपना अधिकतर जीवन पेड़ों पर बिताता है और बहुत अच्छा पेड़ चढ़ने वाला जीव है। लाल पांडा पूर्वी हिमालय के जंगलों में पाया जाता है और आवास की हानि, अवैध शिकार तथा जंगलों के विभाजन से खतरे में है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Red pandas live in cool temperate mountain forests with dense bamboo growth. They are found in the Eastern Himalayas and surrounding mountain regions of Nepal, India, Bhutan, Myanmar, and China. In India, they occur mainly in parts of Sikkim, Arunachal Pradesh, and northern West Bengal, especially in the Himalayan forests.</p>
+          <p class="lang-hi">लाल पांडा ठंडे समशीतोष्ण पर्वतीय जंगलों में रहते हैं, जहाँ बाँस बहुतायत में उगता है। ये नेपाल, भारत, भूटान, म्यांमार और चीन के पूर्वी हिमालय तथा आसपास के पर्वतीय क्षेत्रों में पाए जाते हैं। भारत में ये मुख्य रूप से सिक्किम, अरुणाचल प्रदेश और उत्तरी पश्चिम बंगाल के हिमालयी जंगलों में मिलते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Red pandas are about the size of a large domestic cat. Their bodies are approximately 50–64 cm long, with a bushy tail measuring around 28–59 cm. They have reddish-orange fur, a cream-coloured face with white markings, dark legs, and small rounded ears. Their long, fluffy tails have reddish and pale rings and help them balance while climbing.</p>
+          <p class="lang-hi">लाल पांडा का आकार लगभग एक बड़ी घरेलू बिल्ली जितना होता है। इनके शरीर की लंबाई लगभग 50–64 सेंटीमीटर और घनी पूँछ की लंबाई लगभग 28–59 सेंटीमीटर होती है। इनके शरीर पर लाल-नारंगी फर, चेहरे पर क्रीम रंग और सफेद निशान, गहरे रंग के पैर तथा छोटे गोल कान होते हैं। इनकी लंबी और घनी पूँछ पर लाल तथा हल्के रंग के छल्ले होते हैं, जो पेड़ों पर चढ़ते समय संतुलन बनाने में मदद करते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Red pandas mainly eat bamboo leaves and shoots. They may also eat fruits, berries, roots, acorns, insects, bird eggs, and occasionally small animals. Although they belong to the order Carnivora, bamboo makes up most of their diet.</p>
+          <p class="lang-hi">लाल पांडा मुख्य रूप से बाँस की पत्तियाँ और कोमल अंकुर खाते हैं। इसके अलावा ये फल, बेरियाँ, जड़ें, बलूत के फल, कीड़े, पक्षियों के अंडे और कभी-कभी छोटे जानवर भी खाते हैं। मांसाहारी गण में शामिल होने के बावजूद इनके आहार का अधिकांश हिस्सा बाँस होता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Deforestation and destruction of bamboo-rich forest habitats.</li>
+            <li class="lang-hi">वनों की कटाई और बाँस से भरपूर प्राकृतिक आवासों का नष्ट होना।</li>
+            <li class="lang-en">Fragmentation of forests due to roads, agriculture, and human settlements.</li>
+            <li class="lang-hi">सड़कों, कृषि और मानव बस्तियों के कारण जंगलों का विभाजित होना।</li>
+            <li class="lang-en">Poaching and illegal wildlife trade for fur and live animals.</li>
+            <li class="lang-hi">फर और जीवित जानवरों के अवैध व्यापार के लिए शिकार।</li>
+            <li class="lang-en">Accidental capture in traps set for other animals.</li>
+            <li class="lang-hi">अन्य जानवरों के लिए लगाए गए जालों में गलती से फँस जाना।</li>
+            <li class="lang-en">Climate change affecting mountain forests and bamboo availability.</li>
+            <li class="lang-hi">जलवायु परिवर्तन के कारण पर्वतीय जंगलों और बाँस की उपलब्धता पर प्रभाव।</li>
+            <li class="lang-en">Competition with livestock for food and habitat resources.</li>
+            <li class="lang-hi">भोजन और आवास के संसाधनों के लिए पालतू पशुओं के साथ प्रतिस्पर्धा।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Red pandas are excellent tree climbers and can descend trees headfirst. Their ankles are highly flexible, helping them climb down tree trunks safely. They use their fluffy tails like blankets to keep warm in cold weather. They have a special wrist bone that acts like a thumb and helps them grip bamboo. Red pandas are generally solitary and are most active during dawn and dusk.</p>
+          <p class="lang-hi">लाल पांडा पेड़ों पर चढ़ने में बहुत कुशल होते हैं और सिर नीचे करके पेड़ों से उतर भी सकते हैं। इनके टखने बहुत लचीले होते हैं, जो पेड़ों से सुरक्षित उतरने में मदद करते हैं। ठंड के मौसम में ये अपनी घनी पूँछ का उपयोग कंबल की तरह करते हैं। इनके अगले पंजे में कलाई की एक विशेष हड्डी होती है, जो अंगूठे की तरह काम करके बाँस पकड़ने में मदद करती है। ये सामान्यतः अकेले रहते हैं और सुबह तथा शाम के समय अधिक सक्रिय होते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.iucnredlist.org/" target="_blank">IUCN Red List</a><br>
+            <a href="https://www.worldwildlife.org/species/red-panda/" target="_blank">World Wildlife Fund (WWF)</a><br>
+            <a href="https://www.wwf.org.uk/learn/fascinating-facts/red-panda" target="_blank">WWF UK — Red Panda Facts</a><br>
+            <a href="https://www.nationalgeographic.com/animals/mammals/facts/red-panda" target="_blank">National Geographic</a><br>
+            <a href="https://wallpaperscraft.com/download/red_panda_tree_wildlife_797019/2780x2780" target="_blank">Image Source — WallpapersCraft</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Endangered (EN) — IUCN Red List (2015 assessment).
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> संकटग्रस्त (EN) — IUCN रेड लिस्ट (2015 आकलन)।
+      </div>
+    </article>
+
+
+        
+    <!-- HAWKSBILL TURTLE -->
+    <article class="detail" id="hawksbill-turtle">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Endangered</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://static.nationalgeographicbrasil.com/files/styles/image_3200/public/33910332034c471d84c0eo.webp?h=1200&q=100&w=1600')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Hawksbill Turtle</span><span class="lang-hi">हॉक्सबिल कछुआ</span></h2>
+          <div class="sci">Eretmochelys imbricata</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+          <p class="lang-en">The Hawksbill Turtle is a beautiful marine reptile famous for its colourful patterned shell and distinctive pointed, hawk-like beak. It is mainly found in tropical coral reef ecosystems. This turtle plays an important role in maintaining healthy coral reefs by feeding on sponges. Unfortunately, it is critically endangered due to illegal shell trade, habitat destruction, pollution, and accidental capture in fishing gear.</p>
+          <p class="lang-hi">हॉक्सबिल कछुआ एक सुंदर समुद्री सरीसृप है, जो अपने रंगीन और आकर्षक खोल तथा बाज जैसी नुकीली चोंच के लिए प्रसिद्ध है। यह मुख्य रूप से उष्णकटिबंधीय प्रवाल भित्तियों में पाया जाता है। यह स्पंज खाकर प्रवाल भित्तियों के स्वास्थ्य और संतुलन को बनाए रखने में महत्वपूर्ण भूमिका निभाता है। अवैध खोल व्यापार, आवास विनाश, प्रदूषण और मछली पकड़ने के जालों में फँसने के कारण यह विलुप्त होने के अत्यंत गंभीर खतरे में है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Hawksbill turtles inhabit tropical and subtropical waters of the Atlantic, Pacific, and Indian Oceans. They are commonly associated with coral reefs, rocky coastlines, lagoons, and coastal feeding grounds. They are found in countries including India, Sri Lanka, Indonesia, Australia, Mexico, and many Caribbean nations. Females return to sandy tropical beaches to lay their eggs.</p>
+          <p class="lang-hi">हॉक्सबिल कछुए अटलांटिक, प्रशांत और हिंद महासागर के उष्णकटिबंधीय तथा उपोष्णकटिबंधीय जल क्षेत्रों में रहते हैं। ये मुख्य रूप से प्रवाल भित्तियों, चट्टानी तटों, लैगून और समुद्र के तटीय भोजन क्षेत्रों में पाए जाते हैं। ये भारत, श्रीलंका, इंडोनेशिया, ऑस्ट्रेलिया, मेक्सिको और कैरेबियाई देशों सहित कई क्षेत्रों में मिलते हैं। मादा कछुए अंडे देने के लिए रेतीले उष्णकटिबंधीय समुद्र तटों पर लौटती हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Hawksbill turtles usually grow about 60–90 cm in shell length and weigh around 45–70 kg, although some individuals can be larger. Their shells have beautiful overlapping plates with amber, brown, yellow, and black patterns. They have a narrow head and a sharp, pointed beak resembling a hawk's bill. Their flippers help them swim efficiently through the ocean.</p>
+          <p class="lang-hi">हॉक्सबिल कछुओं के खोल की लंबाई सामान्यतः लगभग 60–90 सेंटीमीटर होती है और इनका वजन लगभग 45–70 किलोग्राम होता है। कुछ कछुए इससे बड़े भी हो सकते हैं। इनके खोल पर एम्बर, भूरे, पीले और काले रंग के सुंदर परस्पर चढ़े हुए पैटर्न होते हैं। इनका सिर संकरा और मुँह बाज की चोंच जैसा नुकीला होता है। इनके फ्लिपर्स समुद्र में कुशलतापूर्वक तैरने में मदद करते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Hawksbill turtles are omnivorous but feed mainly on marine sponges. Their narrow, pointed beaks allow them to reach into small cracks and crevices in coral reefs to extract food. They may also eat jellyfish, sea anemones, algae, and other small marine invertebrates.</p>
+          <p class="lang-hi">हॉक्सबिल कछुए सर्वाहारी होते हैं, लेकिन इनका मुख्य भोजन समुद्री स्पंज होते हैं। इनकी पतली और नुकीली चोंच इन्हें प्रवाल भित्तियों की छोटी दरारों और छिद्रों से भोजन निकालने में मदद करती है। ये जेलीफिश, समुद्री एनीमोन, शैवाल और अन्य छोटे समुद्री अकशेरुकी जीव भी खाते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Illegal hunting for their beautiful shells, which are used in jewellery and ornaments.</li>
+            <li class="lang-hi">सुंदर खोल के लिए अवैध शिकार, जिनका उपयोग आभूषण और सजावटी वस्तुएँ बनाने में किया जाता है।</li>
+            <li class="lang-en">Destruction and degradation of coral reef habitats.</li>
+            <li class="lang-hi">प्रवाल भित्तियों के प्राकृतिक आवासों का विनाश और क्षरण।</li>
+            <li class="lang-en">Accidental capture and drowning in fishing nets and hooks.</li>
+            <li class="lang-hi">मछली पकड़ने के जालों और काँटों में गलती से फँसकर डूब जाना।</li>
+            <li class="lang-en">Collection of eggs and disturbance of nesting beaches.</li>
+            <li class="lang-hi">अंडों का संग्रह और अंडे देने वाले समुद्र तटों पर मानवीय गतिविधियों से परेशानी।</li>
+            <li class="lang-en">Plastic pollution and other marine waste.</li>
+            <li class="lang-hi">प्लास्टिक प्रदूषण और अन्य समुद्री कचरा।</li>
+            <li class="lang-en">Climate change, rising sea levels, and warming nesting beaches.</li>
+            <li class="lang-hi">जलवायु परिवर्तन, समुद्र के बढ़ते जलस्तर और अंडे देने वाले समुद्र तटों का गर्म होना।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Hawksbill turtles are named after their sharp, bird-like beaks. Their overlapping shell plates create a beautiful tortoiseshell pattern. They help maintain coral reef ecosystems by controlling sponge populations. Females may lay several nests during one breeding season, with each nest containing around 130 eggs on average. They can travel long distances between feeding and nesting areas.</p>
+          <p class="lang-hi">हॉक्सबिल कछुओं का नाम उनकी पक्षी जैसी नुकीली चोंच के कारण पड़ा है। इनके खोल की एक-दूसरे पर चढ़ी हुई प्लेटें सुंदर कछुआ-खोल जैसा पैटर्न बनाती हैं। ये स्पंज की आबादी को नियंत्रित करके प्रवाल भित्तियों के पारिस्थितिकी तंत्र को स्वस्थ रखने में मदद करते हैं। प्रजनन के एक मौसम में मादा कई बार अंडे दे सकती है और प्रत्येक घोंसले में औसतन लगभग 130 अंडे होते हैं। ये भोजन और अंडे देने के स्थानों के बीच लंबी दूरी तय कर सकते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.iucnredlist.org/" target="_blank">IUCN Red List</a><br>
+            <a href="https://www.worldwildlife.org/species/sea-turtle/hawksbill-turtle/" target="_blank">World Wildlife Fund (WWF)</a><br>
+            <a href="https://www.fisheries.noaa.gov/species/hawksbill-turtle" target="_blank">NOAA Fisheries</a><br>
+            <a href="https://www.cms.int/species/eretmochelys-imbricata" target="_blank">Convention on Migratory Species (CMS)</a><br>
+            <a href="https://www.nationalgeographicbrasil.com/photography/2024/06/quantas-especies-de-tartarugas-marinhas-existem-confira-estas-fotos-e-descubra" target="_blank">Image Source — National Geographic</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Critically Endangered (CR) — IUCN Red List.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> गंभीर रूप से संकटग्रस्त (CR) — IUCN रेड लिस्ट।
+      </div>
+    </article>
+
+
+        
+    <!-- QUAGGA -->
+    <article class="detail" id="quagga">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-boTnfsB1Kdr3VWfGLb6pfUsGQwXZRPFxJwxx4NZCTNHTo86mY3RKgFjO&s=10')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Quagga</span><span class="lang-hi">क्वागा</span></h2>
+          <div class="sci">Equus quagga quagga</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">The Quagga was an extinct subspecies of the Plains Zebra, famous for its unusual coat pattern. Unlike modern zebras, it had dark stripes mainly on its head, neck, and front part of the body, while its hindquarters were mostly brown and unstriped. It once lived in the grasslands of South Africa but disappeared due to excessive hunting and habitat loss. The last known captive quagga died in Amsterdam in 1883.</p>
+          <p class="lang-hi">क्वागा मैदानी ज़ेबरा की एक विलुप्त उप-प्रजाति थी, जो अपने अनोखे शरीर के पैटर्न के लिए प्रसिद्ध थी। आधुनिक ज़ेबरा के विपरीत, इसके शरीर पर गहरी धारियाँ मुख्य रूप से सिर, गर्दन और अगले हिस्से में होती थीं, जबकि पिछले हिस्से का रंग अधिकतर भूरा और बिना धारियों वाला होता था। यह कभी दक्षिण अफ्रीका के घास के मैदानों में पाया जाता था, लेकिन अत्यधिक शिकार और आवास की हानि के कारण विलुप्त हो गया। अंतिम ज्ञात जीवित क्वागा की मृत्यु 1883 में एम्स्टर्डम में हुई थी।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Quaggas originally inhabited the grasslands, dry scrublands, and semi-arid regions of South Africa. Their historical range included parts of the Cape Province and the Orange Free State, mainly south of the Orange and Vaal Rivers. They preferred open grasslands where they could graze and find water.</p>
+          <p class="lang-hi">क्वागा मूल रूप से दक्षिण अफ्रीका के घास के मैदानों, सूखी झाड़ियों वाले क्षेत्रों और अर्ध-शुष्क इलाकों में रहते थे। इनका ऐतिहासिक वितरण केप प्रांत और ऑरेंज फ्री स्टेट के कुछ हिस्सों में था, विशेष रूप से ऑरेंज और वाल नदियों के दक्षिण में। इन्हें खुले घास के मैदान पसंद थे, जहाँ ये चर सकते थे और पानी प्राप्त कर सकते थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">The Quagga had a horse-like body with a distinctive reddish-brown coat. Its head, neck, and front body displayed dark stripes, which gradually faded toward the hindquarters. Its legs were mostly pale and lacked the bold stripes seen in many other zebras. It had a short, upright mane and a sturdy body adapted for life in open grasslands.</p>
+          <p class="lang-hi">क्वागा का शरीर घोड़े जैसा था और इसका फर लाल-भूरे रंग का होता था। इसके सिर, गर्दन और शरीर के अगले हिस्से पर गहरी धारियाँ होती थीं, जो पिछले हिस्से की ओर धीरे-धीरे गायब हो जाती थीं। इसके पैर अधिकतर हल्के रंग के और अन्य ज़ेबरा की तरह गहरी धारियों से रहित होते थे। इसकी अयाल छोटी और सीधी होती थी तथा शरीर खुले घास के मैदानों में रहने के अनुकूल था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Quaggas were herbivores and mainly grazed on grasses. They could also feed on other vegetation when grass was scarce. Like other grazing zebras, they needed regular access to fresh water and often moved across grasslands in search of food and suitable grazing areas.</p>
+          <p class="lang-hi">क्वागा शाकाहारी थे और मुख्य रूप से घास चरते थे। जब घास की कमी होती थी, तब ये अन्य वनस्पतियाँ भी खाते थे। अन्य घास चरने वाले ज़ेबरा की तरह इन्हें नियमित रूप से ताजे पानी की आवश्यकता होती थी और ये भोजन तथा उपयुक्त चरागाहों की तलाश में घास के मैदानों में घूमते रहते थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Excessive hunting by European settlers for meat and hides.</li>
+            <li class="lang-hi">मांस और खाल के लिए यूरोपीय बसने वालों द्वारा अत्यधिक शिकार।</li>
+            <li class="lang-en">Expansion of farms and livestock grazing into their natural habitat.</li>
+            <li class="lang-hi">खेती और पालतू पशुओं के चरने के कारण प्राकृतिक आवास का कम होना।</li>
+            <li class="lang-en">Competition with domestic livestock for grass and water.</li>
+            <li class="lang-hi">घास और पानी के लिए पालतू पशुओं के साथ प्रतिस्पर्धा।</li>
+            <li class="lang-en">Fencing and agricultural development restricted access to grazing areas and water sources.</li>
+            <li class="lang-hi">बाड़ लगाने और कृषि विकास के कारण चरागाहों तथा जल स्रोतों तक पहुँच सीमित होना।</li>
+            <li class="lang-en">Large-scale hunting rapidly reduced the remaining wild population.</li>
+            <li class="lang-hi">बड़े पैमाने पर शिकार के कारण बची हुई जंगली आबादी में तेजी से गिरावट आना।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The word "Quagga" is believed to imitate the animal's barking call. The last known captive quagga died on 12 August 1883 at Amsterdam Zoo. It was once mistaken for a separate zebra species, but genetic research confirmed that it was a subspecies of the Plains Zebra. The Quagga Project in South Africa selectively breeds Plains Zebras with reduced striping to recreate some of the quagga's appearance, but these animals are not genetically resurrected quaggas.</p>
+          <p class="lang-hi">माना जाता है कि "क्वागा" नाम इस जानवर की भौंकने जैसी आवाज़ की नकल करता है। अंतिम ज्ञात जीवित क्वागा की मृत्यु 12 अगस्त 1883 को एम्स्टर्डम चिड़ियाघर में हुई थी। पहले इसे ज़ेबरा की एक अलग प्रजाति माना जाता था, लेकिन आनुवंशिक शोध से पुष्टि हुई कि यह मैदानी ज़ेबरा की एक उप-प्रजाति थी। दक्षिण अफ्रीका में क्वागा प्रोजेक्ट के अंतर्गत कम धारियों वाले मैदानी ज़ेबरा का चयनात्मक प्रजनन किया जाता है, ताकि क्वागा जैसा रूप फिर से विकसित किया जा सके। हालाँकि, ये आनुवंशिक रूप से पुनर्जीवित असली क्वागा नहीं हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://animaldiversity.org/accounts/Equus_quagga/" target="_blank">Animal Diversity Web — University of Michigan</a><br>
+            <a href="https://www.quaggaproject.org/" target="_blank">The Quagga Project</a><br>
+            <a href="https://www.nhm.ac.uk/visit/tring/galleries.html" target="_blank">Natural History Museum</a><br>
+            <a href="https://histecon.fas.harvard.edu/climate-loss/extinction/quagga.html" target="_blank">Harvard University — Quagga Extinction</a><br>
+            <a href="https://upload.wikimedia.org/wikipedia/commons/d/d1/Quagga_HIFI.jpg" target="_blank">Historical Quagga Photograph — Wikimedia Commons</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Extinct (EX) — The Quagga was an extinct subspecies of the Plains Zebra.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> विलुप्त (EX) — क्वागा मैदानी ज़ेबरा की एक विलुप्त उप-प्रजाति थी।
+      </div>
+    </article>
+
+
+        
+<!-- =========== STELLER'S SEA COW =========== -->
+    <article class="detail" id="stellers-sea-cow">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://i.natgeofe.com/n/9783da48-87ab-4cc4-9849-a8a87923fbad/Sea-Cow-Bering-Island-Final-small.jpeg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Steller's Sea Cow</span><span class="lang-hi">स्टेलर की समुद्री गाय</span></h2>
+          <div class="sci">Hydrodamalis gigas</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">Steller's Sea Cow was a gigantic marine mammal that lived in the cold coastal waters of the North Pacific Ocean. It was related to modern dugongs and manatees and was famous for its enormous body, thick skin, and gentle nature. It fed mainly on kelp and other marine vegetation. After being discovered by European explorers in 1741, it was hunted intensively and became extinct by 1768.</p>
+          <p class="lang-hi">स्टेलर की समुद्री गाय एक विशाल समुद्री स्तनधारी थी, जो उत्तरी प्रशांत महासागर के ठंडे तटीय जल में रहती थी। इसका संबंध आधुनिक डुगोंग और मैनेटी से था। यह अपने विशाल शरीर, मोटी त्वचा और शांत स्वभाव के लिए प्रसिद्ध थी। यह मुख्य रूप से समुद्री केल्प और अन्य जलीय वनस्पतियाँ खाती थी। 1741 में यूरोपीय खोजकर्ताओं द्वारा देखे जाने के बाद इसका अत्यधिक शिकार किया गया और 1768 तक यह विलुप्त हो गई।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Steller's Sea Cows lived in shallow coastal waters of the North Pacific Ocean. In historical times, their last known population survived around the Commander Islands, especially Bering Island and Copper Island near the Kamchatka Peninsula of Russia. They preferred sheltered coastal areas rich in kelp and other seaweeds.</p>
+          <p class="lang-hi">स्टेलर की समुद्री गाय उत्तरी प्रशांत महासागर के उथले तटीय जल में रहती थी। ऐतिहासिक समय में इनकी अंतिम ज्ञात आबादी रूस के कामचटका प्रायद्वीप के पास कमांडर द्वीपों, विशेषकर बेरिंग द्वीप और कॉपर द्वीप के आसपास बची हुई थी। इन्हें केल्प और अन्य समुद्री शैवाल से भरपूर सुरक्षित तटीय क्षेत्र पसंद थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Steller's Sea Cow was one of the largest members of the sirenian group. Adults could reach approximately 7–9 metres in length and weigh several tonnes, with some estimates approaching 10 tonnes. It had a massive barrel-shaped body, small head, thick wrinkled skin, paddle-like forelimbs, and a broad tail fluke. Its bones were unusually dense, and its mouth had tough horny plates instead of ordinary teeth.</p>
+          <p class="lang-hi">स्टेलर की समुद्री गाय सिरेनिया समूह के सबसे बड़े जीवों में से एक थी। वयस्क जीवों की लंबाई लगभग 7–9 मीटर तक हो सकती थी और उनका वजन कई टन होता था। कुछ अनुमानों के अनुसार इनका वजन लगभग 10 टन तक पहुँच सकता था। इनका शरीर विशाल और पीपे जैसा, सिर छोटा, त्वचा मोटी तथा झुर्रीदार और आगे के अंग चप्पू जैसे होते थे। इनकी चौड़ी पूँछ पानी में तैरने में मदद करती थी। इनके मुँह में सामान्य दाँतों के बजाय कठोर सींग जैसी भोजन पीसने वाली प्लेटें थीं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Steller's Sea Cows were herbivores. Their diet consisted mainly of kelp and other large marine algae growing in shallow coastal waters. They grazed near the ocean surface and used their tough mouth plates to tear and process seaweed. They spent much of their time feeding in groups.</p>
+          <p class="lang-hi">स्टेलर की समुद्री गाय शाकाहारी थी। इसका मुख्य भोजन उथले तटीय जल में उगने वाला केल्प और अन्य बड़े समुद्री शैवाल थे। यह समुद्र की सतह के पास चरती थी और अपने मुँह की कठोर प्लेटों से शैवाल को तोड़कर खाती थी। यह अपना काफी समय समूहों में भोजन करने में बिताती थी।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Intensive hunting by Russian sailors and fur traders for meat and fat.</li>
+            <li class="lang-hi">मांस और चर्बी के लिए रूसी नाविकों तथा फर व्यापारियों द्वारा अत्यधिक शिकार।</li>
+            <li class="lang-en">Their limited remaining population was especially vulnerable to overhunting.</li>
+            <li class="lang-hi">इनकी बची हुई सीमित आबादी अत्यधिक शिकार के कारण आसानी से समाप्त हो सकती थी।</li>
+            <li class="lang-en">Slow reproduction made it difficult for the population to recover from hunting.</li>
+            <li class="lang-hi">धीमी प्रजनन दर के कारण शिकार के बाद इनकी आबादी का दोबारा बढ़ना कठिन था।</li>
+            <li class="lang-en">Their restricted habitat around a few islands made the entire population easier to exploit.</li>
+            <li class="lang-hi">कुछ ही द्वीपों तक सीमित आवास के कारण पूरी आबादी का शिकार करना आसान हो गया था।</li>
+            <li class="lang-en">Changes in kelp forest ecosystems may also have affected their survival, although the exact contribution remains debated.</li>
+            <li class="lang-hi">केल्प वनों के पारिस्थितिकी तंत्र में बदलाव ने भी इनके अस्तित्व को प्रभावित किया हो सकता है, हालाँकि इसका वास्तविक योगदान अभी भी शोध का विषय है।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Steller's Sea Cow was named after the naturalist Georg Wilhelm Steller, who described it during the 1741 Bering expedition. It was closely related to modern dugongs but was much larger. Its skin was extremely thick and rough. It was reportedly so buoyant that much of its body remained near the water surface while feeding. The last known population was wiped out by around 1768, only about 27 years after its scientific discovery.</p>
+          <p class="lang-hi">स्टेलर की समुद्री गाय का नाम प्रकृतिविद् जॉर्ज विल्हेम स्टेलर के नाम पर रखा गया था, जिन्होंने 1741 के बेरिंग अभियान के दौरान इसका वर्णन किया था। इसका संबंध आधुनिक डुगोंग से था, लेकिन यह उससे बहुत बड़ी थी। इसकी त्वचा अत्यंत मोटी और खुरदरी होती थी। बताया जाता है कि इसका शरीर इतना उछाल वाला था कि भोजन करते समय इसका अधिकांश हिस्सा पानी की सतह के पास रहता था। इसकी अंतिम ज्ञात आबादी लगभग 1768 तक समाप्त हो गई, यानी वैज्ञानिक खोज के लगभग 27 वर्षों के भीतर।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.nhm.ac.uk/discover/stellers-sea-cow-first-historical-extinction-of-marine-mammal-at-human-hands.html" target="_blank">Natural History Museum — Steller's Sea Cow</a><br>
+            <a href="https://animaldiversity.org/accounts/Hydrodamalis_gigas/" target="_blank">Animal Diversity Web — University of Michigan</a><br>
+            <a href="https://pubs.usgs.gov/pp/1036/report.pdf" target="_blank">US Geological Survey — Steller's Sea Cow</a><br>
+            <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1617197/" target="_blank">Research: Modelling the Extinction</a><br>
+            <a href="https://www.nationalgeographic.com/science/article/your-de-extinction-questions-answered" target="_blank">National Geographic — Artistic Reconstruction</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Extinct (EX) — Extinct by approximately 1768.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> विलुप्त (EX) — लगभग 1768 तक पूरी तरह विलुप्त।
+      </div>
+    </article>
+
+
+
+       
+<!-- ============== Great Auk ============= -->
+    <article class="detail" id="great-auk">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://media.longnow.org/files/2/Gazza-marina-Hornoya_MRavasini_IMG_6620.jpg')"></div>
+        <div class="detail-meta">
+          <h2><span class="lang-en">Great Auk</span><span class="lang-hi">विशाल ऑक</span></h2>
+          <div class="sci">Pinguinus impennis</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">The Great Auk was a large, flightless seabird that once lived across the North Atlantic. It was an excellent swimmer and diver, but could not fly. The last confirmed breeding pair was killed in Iceland in 1844.</p>
+          <p class="lang-hi">विशाल ऑक उत्तरी अटलांटिक महासागर में पाया जाने वाला एक बड़ा, उड़ान न भर सकने वाला समुद्री पक्षी था। यह पानी में बहुत अच्छा तैरता और गोता लगाता था, लेकिन उड़ नहीं सकता था। इसका अंतिम प्रमाणित प्रजनन जोड़ा 1844 में आइसलैंड में मार दिया गया था।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Great Auks inhabited the cold waters and rocky islands of the North Atlantic. Their breeding colonies were found around Iceland, Greenland, Newfoundland, Canada, and parts of the British Isles and Scandinavia. They nested on isolated rocky islands and spent much of their lives at sea.</p>
+          <p class="lang-hi">विशाल ऑक उत्तरी अटलांटिक के ठंडे समुद्री क्षेत्रों और चट्टानी द्वीपों में रहते थे। इनके प्रजनन स्थल आइसलैंड, ग्रीनलैंड, न्यूफ़ाउंडलैंड, कनाडा तथा ब्रिटिश द्वीपों और स्कैंडिनेविया के कुछ हिस्सों में थे। ये एकांत चट्टानी द्वीपों पर घोंसले बनाते थे और अपना अधिकांश समय समुद्र में बिताते थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">The Great Auk stood around 70–85 cm tall and weighed approximately 5 kg. It had a black back and head, a white belly, a large ridged beak, and a distinctive white patch near each eye. Its short, powerful wings acted like flippers underwater, helping it swim and catch prey.</p>
+          <p class="lang-hi">विशाल ऑक की ऊँचाई लगभग 70–85 सेंटीमीटर और वजन करीब 5 किलोग्राम था। इसकी पीठ और सिर काले, पेट सफेद तथा चोंच बड़ी और धारियों वाली थी। इसकी आँखों के पास सफेद धब्बे होते थे। इसके छोटे और मजबूत पंख पानी के अंदर चप्पू की तरह काम करते थे, जिससे यह तैरकर शिकार पकड़ता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Great Auks were carnivorous seabirds that mainly fed on fish. They caught their prey by diving underwater and swimming with their powerful wings. Their streamlined bodies made them highly adapted to hunting in the sea.</p>
+          <p class="lang-hi">विशाल ऑक मांसाहारी समुद्री पक्षी थे और मुख्य रूप से मछलियाँ खाते थे। ये पानी के अंदर गोता लगाकर और अपने मजबूत पंखों की मदद से तैरकर शिकार पकड़ते थे। इनका सुव्यवस्थित शरीर समुद्र में शिकार करने के लिए अनुकूल था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Intensive hunting by sailors for meat, fat, feathers, and bait.</li>
+            <li class="lang-hi">मांस, चर्बी, पंख और मछली पकड़ने के चारे के लिए नाविकों द्वारा बड़े पैमाने पर शिकार।</li>
+            <li class="lang-en">Collection of their eggs and skins by traders and collectors.</li>
+            <li class="lang-hi">व्यापारियों और संग्रहकर्ताओं द्वारा इनके अंडों और खालों का संग्रह।</li>
+            <li class="lang-en">Breeding colonies were concentrated on a small number of isolated islands, making the birds especially vulnerable to human hunting.</li>
+            <li class="lang-hi">इनके प्रजनन स्थल कुछ ही एकांत द्वीपों तक सीमित थे, जिससे मनुष्यों द्वारा शिकार करना आसान हो गया।</li>
+            <li class="lang-en">As the population declined, the remaining birds became highly valuable to museums and private collectors.</li>
+            <li class="lang-hi">संख्या घटने के बाद बचे हुए पक्षी संग्रहालयों और निजी संग्रहकर्ताओं के लिए बहुत मूल्यवान बन गए।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The Great Auk was the original bird associated with the name "penguin"; the name was later applied to unrelated birds of the Southern Hemisphere. It laid only one egg each breeding season. The last reliably documented breeding pair was killed on Eldey Island, Iceland, in June 1844. Although later sightings were reported, none has been reliably confirmed.</p>
+          <p class="lang-hi">"पेंगुइन" नाम मूल रूप से विशाल ऑक के लिए इस्तेमाल किया जाता था; बाद में यह नाम दक्षिणी गोलार्ध के अलग पक्षियों के लिए प्रचलित हो गया। यह प्रत्येक प्रजनन मौसम में केवल एक अंडा देता था। इसका अंतिम विश्वसनीय रूप से दर्ज प्रजनन जोड़ा जून 1844 में आइसलैंड के एल्डे द्वीप पर मार दिया गया था। इसके बाद कुछ देखे जाने की खबरें मिलीं, लेकिन उनकी पुष्टि नहीं हुई।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p>
+            <a href="https://www.si.edu/exhibitions/research-case-great-auk-event-event-exhib-4482" target="_blank">Smithsonian Institution</a><br>
+            <a href="https://www.bto.org/learn/about-birds/birdfacts/great-auk" target="_blank">British Trust for Ornithology</a><br>
+            <a href="https://animaldiversity.org/accounts/Pinguinus_impennis/" target="_blank">Animal Diversity Web</a><br>
+            <a href="https://exhibits.library.cornell.edu/last-call/feature/great-auk" target="_blank">Cornell University Library</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="sources lang-en">
+        <strong>Conservation Status:</strong> Extinct (EX). The last confirmed breeding pair was killed in 1844.
+      </div>
+      <div class="sources lang-hi">
+        <strong>संरक्षण स्थिति:</strong> विलुप्त (EX)। अंतिम प्रमाणित प्रजनन जोड़ा 1844 में मार दिया गया था।
+      </div>
+    </article>
+
+
+
+ <!-- ================ ATLAS BEAR ================ -->
+    <article class="detail" id="atlas-bear">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFjDKpe06U9kxOXs7ZGVZEpHR9Estvtmd_bRIAajvXXQ&s=10')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Atlas Bear</span><span class="lang-hi">एटलस भालू</span></h2>
+          <div class="sci">Ursus arctos crowtheri</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">The Atlas Bear was a North African population or subspecies of brown bear. It was the only bear known to have lived in Africa in historical times.
+          Heavy hunting by humans.Capture for animal fights and public entertainment during Roman times.</p>
+          <p class="lang-hi">एटलस भालू भूरे भालू की उत्तरी अफ्रीकी आबादी या उप-प्रजाति था। ऐतिहासिक समय में अफ्रीका में पाया जाने वाला यह एकमात्र ज्ञात भालू था।
+          मनुष्यों द्वारा बड़े पैमाने पर शिकार।रोमन काल में जानवरों की लड़ाई और सार्वजनिक मनोरंजन के लिए पकड़ना।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">It inhabited the Atlas Mountains and surrounding regions of North Africa, including parts of Morocco, Algeria and Tunisia. It lived in mountainous and forested habitats.</p>
+          <p class="lang-hi">यह उत्तरी अफ्रीका के एटलस पर्वत और आसपास के क्षेत्रों में पाया जाता था, जिनमें मोरक्को, अल्जीरिया और ट्यूनीशिया के कुछ भाग शामिल थे। इसका आवास पहाड़ी और जंगल वाले क्षेत्र थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Historical descriptions suggest it had a stocky body, short broad face and shaggy dark brown or blackish fur, with orange-rufous colouring on its underside.</p>
+          <p class="lang-hi">ऐतिहासिक विवरणों के अनुसार इसका शरीर मजबूत, चेहरा छोटा और चौड़ा तथा फर गहरे भूरे या काले रंग का घना होता था। इसके पेट के निचले हिस्से पर नारंगी-लालिमा वाला रंग था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">It was believed to eat roots, acorns, fruits and other plant material. Like other brown bears, it may also have consumed animal food.</p>
+          <p class="lang-hi">ऐसा माना जाता है कि यह जड़ें, बलूत के फल, अन्य फल और वनस्पति खाता था। दूसरे भूरे भालुओं की तरह यह पशु-आधारित भोजन भी खा सकता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Heavy hunting by humans.</li>
+            <li class="lang-hi">मनुष्यों द्वारा बड़े पैमाने पर शिकार।</li>
+            <li class="lang-en">Capture for animal fights and public entertainment during Roman times.</li>
+            <li class="lang-hi">रोमन काल में जानवरों की लड़ाई और सार्वजनिक मनोरंजन के लिए पकड़ना।</li>
+            <li class="lang-en">Loss of suitable habitat and increasing human pressure.</li>
+            <li class="lang-hi">उपयुक्त आवास का नुकसान और मनुष्यों का बढ़ता दबाव।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The Atlas Bear was Africa's only known native bear in historical times. It is generally believed to have disappeared by the late 19th century. Its exact taxonomic status has been debated by scientists.</p>
+          <p class="lang-hi">ऐतिहासिक समय में एटलस भालू अफ्रीका का एकमात्र ज्ञात मूल निवासी भालू था। माना जाता है कि 19वीं सदी के अंत तक यह गायब हो गया था। इसकी सटीक वर्गीकरण स्थिति पर वैज्ञानिकों में मतभेद रहे हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p class="lang-en">
+            <a href="https://www.globalbearconservation.org/" target="_blank">IUCN SSC Bear Specialist Group</a>;
+            <a href="https://www.artensterben.de/en/atlas-bear/" target="_blank">Atlas Bear – Artensterben</a>;
+            <a href="https://portals.iucn.org/library/sites/library/files/documents/RD-1962-001-En.pdf" target="_blank">IUCN Red Data Book</a>.
+          </p>
+          <p class="lang-hi">
+            IUCN भालू विशेषज्ञ समूह; Atlas Bear – Artensterben; IUCN Red Data Book।
+          </p>
+        </div>
+
+      </div>
+    </article>
+
+
+<!-- ===========  CAROLINA PARAKEET ============== -->
+    <article class="detail" id="carolina-parakeet">
+      <a href="#extinct" class="back-link">← <span class="lang-en">Back to Extinct</span><span class="lang-hi">विलुप्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-qJxnhxh7zZIX4HGzvyP21otjnTFWr5eB29-en-f8P3oZjQY06sIvo8HR&s=10')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Carolina Parakeet</span><span class="lang-hi">कैरोलिना पैराकीट</span></h2>
+          <div class="sci">Conuropsis carolinensis</div>
+          <span class="status-pill badge-ex">Extinct (EX)</span>
+          <p class="lang-en">The Carolina Parakeet was a colourful native parrot of eastern North America. It was the only parrot species native to the eastern United States and became extinct due to human activities.</p>
+          <p class="lang-hi">कैरोलिना पैराकीट उत्तरी अमेरिका के पूर्वी भाग में पाया जाने वाला रंगीन तोता था। यह पूर्वी संयुक्त राज्य अमेरिका का एकमात्र मूल निवासी तोता था और मानवीय गतिविधियों के कारण विलुप्त हो गया।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">It lived across the eastern United States, from the Great Lakes region to the Gulf Coast and Florida. Its preferred habitats included river forests, swamps, cypress forests and woodland areas.</p>
+          <p class="lang-hi">यह ग्रेट लेक्स क्षेत्र से लेकर मैक्सिको की खाड़ी के तट और फ्लोरिडा तक पूर्वी संयुक्त राज्य अमेरिका में पाया जाता था। इसका पसंदीदा आवास नदी किनारे के जंगल, दलदल, साइप्रस के जंगल और वन क्षेत्र थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦜 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">It was about 30 cm long, with a bright green body, yellow head, orange-red face and yellow markings on its wings. Males were slightly larger than females.</p>
+          <p class="lang-hi">इसकी लंबाई लगभग 30 सेंटीमीटर थी। इसका शरीर चमकीला हरा, सिर पीला, चेहरा नारंगी-लाल और पंखों पर पीले निशान होते थे। नर पक्षी मादाओं से थोड़े बड़े होते थे।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">It mainly ate seeds, fruits, nuts, berries, flower buds and plant material. Cocklebur seeds were among its favourite foods. It occasionally consumed insects.</p>
+          <p class="lang-hi">यह मुख्य रूप से बीज, फल, मेवे, जामुन, फूलों की कलियाँ और अन्य वनस्पतियाँ खाता था। कॉकलबुर के बीज इसका पसंदीदा भोजन थे। यह कभी-कभी कीड़े भी खाता था।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Extinction</span><span class="lang-hi">विलुप्ति के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Hunting for meat, feathers and the pet trade.</li>
+            <li class="lang-hi">मांस, पंखों और पालतू पक्षियों के व्यापार के लिए शिकार।</li>
+            <li class="lang-en">Farmers killed them because they damaged fruit and crop fields.</li>
+            <li class="lang-hi">फसलों और फलों को नुकसान पहुँचाने के कारण किसानों द्वारा इनका शिकार।</li>
+            <li class="lang-en">Deforestation destroyed their natural habitat and nesting sites.</li>
+            <li class="lang-hi">वनों की कटाई से इनके प्राकृतिक आवास और घोंसले बनाने के स्थान नष्ट हो गए।</li>
+            <li class="lang-en">Disease and other human-related pressures may also have contributed.</li>
+            <li class="lang-hi">बीमारियों और मनुष्यों से जुड़े अन्य दबावों ने भी इनके विलुप्त होने में योगदान दिया हो सकता है।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Carolina Parakeets lived in noisy, social flocks and often returned to communal roosting sites. They could eat toxic cocklebur seeds without being harmed. The last known captive bird, named Incas, died at the Cincinnati Zoo in 1918.</p>
+          <p class="lang-hi">कैरोलिना पैराकीट शोर मचाने वाले सामाजिक झुंडों में रहते थे और अक्सर सामूहिक विश्राम स्थलों पर लौटते थे। वे जहरीले कॉकलबुर के बीज भी बिना नुकसान के खा सकते थे। अंतिम ज्ञात बंदी पक्षी, जिसका नाम इंकास था, की मृत्यु 1918 में सिनसिनाटी चिड़ियाघर में हुई थी।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p class="lang-en">
+            <a href="https://datazone.birdlife.org/species/factsheet/carolina-parakeet-conuropsis-carolinensis" target="_blank">BirdLife International</a>;
+            <a href="https://exhibits.library.cornell.edu/last-call/feature/carolina-parakeet" target="_blank">Cornell University Library</a>;
+            <a href="https://parrots.org/encyclopedia/carolina-parakeet/" target="_blank">World Parrot Trust</a>;
+            <a href="https://pubmed.ncbi.nlm.nih.gov/31839456/" target="_blank">Current Biology Research</a>.
+          </p>
+          <p class="lang-hi">
+            बर्डलाइफ इंटरनेशनल; कॉर्नेल यूनिवर्सिटी लाइब्रेरी; वर्ल्ड पैरट ट्रस्ट; करंट बायोलॉजी रिसर्च।
+          </p>
+        </div>
+
+      </div>
+    </article>
+
+
+<!-- ==============  CHIMPANZEE ================ -->
+    <article class="detail" id="chimpanzee">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Threatened</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRthlXaQwEytop64Q12rwtW59zgNRYhCwa2he9q_r7YyD0IyHfeQEuhDvcU&s=10')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Chimpanzee</span><span class="lang-hi">चिम्पैंज़ी</span></h2>
+          <div class="sci">Pan troglodytes</div>
+          <span class="status-pill badge-en">Endangered (EN)</span>
+          <p class="lang-en">Chimpanzees are highly intelligent and social great apes native to tropical Africa. They are famous for using tools, communicating with each other and living in complex social groups.</p>
+          <p class="lang-hi">चिम्पैंज़ी अफ्रीका के उष्णकटिबंधीय क्षेत्रों में पाए जाने वाले अत्यंत बुद्धिमान और सामाजिक महावानर हैं। ये औजारों के उपयोग, आपसी संवाद और जटिल सामाजिक समूहों में रहने के लिए प्रसिद्ध हैं।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Chimpanzees are found across tropical Africa, from western countries such as Guinea and Sierra Leone to central and eastern regions including the Democratic Republic of the Congo, Uganda and Tanzania. They inhabit tropical rainforests, woodland savannas and forest edges.</p>
+          <p class="lang-hi">चिम्पैंज़ी पश्चिमी अफ्रीका के गिनी और सिएरा लियोन से लेकर मध्य और पूर्वी अफ्रीका के कांगो लोकतांत्रिक गणराज्य, युगांडा और तंजानिया तक पाए जाते हैं। ये उष्णकटिबंधीय वर्षावनों, वनभूमि और जंगलों के किनारे वाले क्षेत्रों में रहते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦴 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Chimpanzees have strong arms, long fingers, opposable thumbs and a mostly hairless face. Their bodies are covered with dark brown or black hair. Adult males are generally larger than females and can weigh around 40–60 kg.</p>
+          <p class="lang-hi">चिम्पैंज़ी की भुजाएँ मजबूत, उंगलियाँ लंबी और अंगूठे पकड़ने में सक्षम होते हैं। इनके चेहरे पर बहुत कम बाल होते हैं और शरीर गहरे भूरे या काले बालों से ढका रहता है। वयस्क नर सामान्यतः मादाओं से बड़े होते हैं और उनका वजन लगभग 40–60 किलोग्राम हो सकता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍽️ <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Chimpanzees are omnivores. Their diet mainly includes fruits, leaves, seeds, flowers and nuts. They also eat insects, eggs and occasionally hunt small mammals such as monkeys.</p>
+          <p class="lang-hi">चिम्पैंज़ी सर्वाहारी होते हैं। इनके भोजन में मुख्य रूप से फल, पत्तियाँ, बीज, फूल और मेवे शामिल होते हैं। ये कीड़े, अंडे और कभी-कभी बंदरों जैसे छोटे स्तनधारियों का भी शिकार करते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Deforestation and agricultural expansion destroy their natural habitats.</li>
+            <li class="lang-hi">वनों की कटाई और कृषि विस्तार इनके प्राकृतिक आवास को नष्ट करते हैं।</li>
+            <li class="lang-en">Illegal hunting and the bushmeat trade threaten wild populations.</li>
+            <li class="lang-hi">अवैध शिकार और जंगली जानवरों के मांस का व्यापार इनकी आबादी के लिए खतरा हैं।</li>
+            <li class="lang-en">Diseases, including Ebola, can cause serious population declines.</li>
+            <li class="lang-hi">इबोला सहित कई बीमारियाँ इनकी आबादी में गंभीर गिरावट ला सकती हैं।</li>
+            <li class="lang-en">Human-wildlife conflict and the illegal pet trade also affect their survival.</li>
+            <li class="lang-hi">मनुष्य और वन्यजीवों के बीच संघर्ष तथा अवैध पालतू पशु व्यापार भी इनके अस्तित्व को प्रभावित करते हैं।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>🛡️ <span class="lang-en">Conservation Efforts</span><span class="lang-hi">संरक्षण प्रयास</span></h4>
+          <p class="lang-en">Conservation programs protect forests, establish protected areas, prevent illegal hunting and rescue orphaned chimpanzees. Research, wildlife monitoring and community education also help protect their populations.</p>
+          <p class="lang-hi">संरक्षण कार्यक्रम जंगलों की रक्षा करते हैं, संरक्षित क्षेत्र बनाते हैं, अवैध शिकार रोकते हैं और अनाथ चिम्पैंज़ी को बचाते हैं। शोध, वन्यजीव निगरानी और स्थानीय समुदायों को जागरूक करना भी इनकी आबादी की रक्षा में मदद करता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">Chimpanzees share about 98.8% of their DNA with humans. They use sticks to collect termites, stones to crack nuts and leaves as sponges to drink water. They also recognize individuals and form long-lasting social relationships.</p>
+          <p class="lang-hi">चिम्पैंज़ी का लगभग 98.8% DNA मनुष्यों से मिलता-जुलता है। ये दीमक निकालने के लिए लकड़ियों, मेवे तोड़ने के लिए पत्थरों और पानी पीने के लिए पत्तियों को स्पंज की तरह इस्तेमाल करते हैं। ये दूसरे चिम्पैंज़ी को पहचानते हैं और लंबे समय तक सामाजिक संबंध बनाए रखते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p class="lang-en">
+            <a href="https://www.iucnredlist.org/" target="_blank">IUCN Red List</a>;
+            <a href="https://www.worldwildlife.org/species/chimpanzee" target="_blank">WWF – Chimpanzee</a>;
+            <a href="https://www.janegoodall.org/" target="_blank">Jane Goodall Institute</a>;
+            <a href="https://www.nationalgeographic.com/animals/mammals/facts/chimpanzee" target="_blank">National Geographic</a>.
+          </p>
+          <p class="lang-hi">
+            IUCN रेड लिस्ट; WWF; जेन गुडॉल इंस्टीट्यूट; नेशनल ज्योग्राफिक।
+          </p>
+        </div>
+
+      </div>
+    </article>
+
+
+
+
+<!-- ========== SAOLA =========== -->
+    <article class="detail" id="saola">
+      <a href="#endangered" class="back-link">← <span class="lang-en">Back to Threatened</span><span class="lang-hi">संकटग्रस्त प्रजातियों पर वापस</span></a>
+
+      <div class="detail-header">
+        <div class="detail-img" style="background-image:url('https://eco-nana.com/wp-content/uploads/2025/04/the-saola-rarest-large-mamma-animal-wildlife.jpg')"></div>
+
+        <div class="detail-meta">
+          <h2><span class="lang-en">Saola</span><span class="lang-hi">साओला</span></h2>
+          <div class="sci">Pseudoryx nghetinhensis</div>
+          <span class="status-pill badge-cr">Critically Endangered (CR)</span>
+          <p class="lang-en">The Saola, also known as the Asian Unicorn, is one of the world's rarest mammals. It is a forest-dwelling relative of wild cattle, found only in the Annamite Mountains of Vietnam and Laos.</p>
+          <p class="lang-hi">साओला, जिसे एशियन यूनिकॉर्न भी कहा जाता है, दुनिया के सबसे दुर्लभ स्तनधारियों में से एक है। यह जंगली मवेशियों का रिश्तेदार है और केवल वियतनाम तथा लाओस के अन्नामाइट पर्वतों में पाया जाता है।</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-block">
+          <h4>📍 <span class="lang-en">Habitat & Distribution</span><span class="lang-hi">आवास और वितरण</span></h4>
+          <p class="lang-en">Saolas live in the dense evergreen forests of the Annamite Mountains along the border of Vietnam and Laos. They prefer moist forests, steep valleys and areas near forest streams.</p>
+          <p class="lang-hi">साओला वियतनाम और लाओस की सीमा पर स्थित अन्नामाइट पर्वतों के घने सदाबहार जंगलों में रहते हैं। इन्हें नम जंगल, खड़ी घाटियाँ और जंगलों की जलधाराओं के आसपास के क्षेत्र पसंद हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🦌 <span class="lang-en">Physical Characteristics</span><span class="lang-hi">शारीरिक विशेषताएँ</span></h4>
+          <p class="lang-en">Saolas have a dark brown coat, distinctive white facial markings and two long, nearly parallel pointed horns. Both males and females have horns. They stand around 80–90 cm tall at the shoulder and weigh approximately 80–100 kg.</p>
+          <p class="lang-hi">साओला का शरीर गहरे भूरे रंग के बालों से ढका होता है और चेहरे पर सफेद निशान होते हैं। इनके दो लंबे, नुकीले और लगभग समानांतर सींग होते हैं। नर और मादा दोनों के सींग होते हैं। इनके कंधे तक की ऊँचाई लगभग 80–90 सेंटीमीटर और वजन लगभग 80–100 किलोग्राम होता है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>🍃 <span class="lang-en">Diet</span><span class="lang-hi">आहार</span></h4>
+          <p class="lang-en">Saolas are herbivores. They mainly browse on leaves, young shoots, shrubs and other forest plants. They are believed to feed on vegetation growing near streams and in moist forest habitats.</p>
+          <p class="lang-hi">साओला शाकाहारी होते हैं। ये मुख्य रूप से पत्तियाँ, नई कोपलें, झाड़ियाँ और जंगलों में उगने वाले अन्य पौधे खाते हैं। माना जाता है कि ये जलधाराओं के पास और नम जंगलों में उगने वाली वनस्पतियों पर निर्भर रहते हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>⚠️ <span class="lang-en">Reasons for Endangerment</span><span class="lang-hi">संकटग्रस्त होने के कारण</span></h4>
+          <ul>
+            <li class="lang-en">Illegal hunting and wire snares set for other wildlife are the biggest threats.</li>
+            <li class="lang-hi">अवैध शिकार और दूसरे वन्यजीवों को पकड़ने के लिए लगाए गए तार के फंदे सबसे बड़े खतरे हैं।</li>
+
+            <li class="lang-en">Deforestation for agriculture, logging and plantations destroys their habitat.</li>
+            <li class="lang-hi">कृषि, लकड़ी की कटाई और बागानों के विस्तार के लिए वनों की कटाई इनके आवास को नष्ट करती है।</li>
+
+            <li class="lang-en">Road construction and infrastructure development fragment their forest habitat.</li>
+            <li class="lang-hi">सड़क निर्माण और बुनियादी ढाँचे का विकास इनके जंगलों को छोटे-छोटे हिस्सों में बाँट देता है।</li>
+
+            <li class="lang-en">Their extremely small and scattered population makes recovery difficult.</li>
+            <li class="lang-hi">इनकी बहुत छोटी और बिखरी हुई आबादी के कारण इनकी संख्या बढ़ाना मुश्किल है।</li>
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h4>🛡️ <span class="lang-en">Conservation Efforts</span><span class="lang-hi">संरक्षण प्रयास</span></h4>
+          <p class="lang-en">Conservation organizations are working to remove illegal snares, protect evergreen forests, monitor wildlife and search for surviving Saolas using camera traps. Vietnam and Laos also support conservation programs to prevent the species from becoming extinct.</p>
+          <p class="lang-hi">संरक्षण संगठन अवैध फंदों को हटाने, सदाबहार जंगलों की रक्षा करने, वन्यजीवों की निगरानी करने और कैमरा ट्रैप से जीवित साओला को खोजने का काम कर रहे हैं। वियतनाम और लाओस भी इस प्रजाति को विलुप्त होने से बचाने के लिए संरक्षण कार्यक्रम चला रहे हैं।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>💡 <span class="lang-en">Interesting Facts</span><span class="lang-hi">रोचक तथ्य</span></h4>
+          <p class="lang-en">The Saola was discovered by scientists in 1992, making it one of the most remarkable large-mammal discoveries of modern times. It is nicknamed the Asian Unicorn because of its rarity and distinctive horns. No confirmed wild sighting has been recorded since 2013, and no Saolas are currently known to be living in captivity.</p>
+          <p class="lang-hi">वैज्ञानिकों ने साओला की खोज 1992 में की थी, जो आधुनिक समय में बड़े स्तनधारियों की सबसे उल्लेखनीय खोजों में से एक थी। इसकी दुर्लभता और अनोखे सींगों के कारण इसे एशियन यूनिकॉर्न कहा जाता है। 2013 के बाद से जंगल में इसकी कोई पक्की तस्वीर दर्ज नहीं हुई है और वर्तमान में कोई साओला बंदी अवस्था में ज्ञात नहीं है।</p>
+        </div>
+
+        <div class="detail-block">
+          <h4>📚 <span class="lang-en">Sources</span><span class="lang-hi">स्रोत</span></h4>
+          <p class="lang-en">
+            <a href="https://www.worldwildlife.org/species/saola/" target="_blank">WWF – Saola</a>;
+            <a href="https://www.iucnredlist.org/" target="_blank">IUCN Red List</a>;
+            <a href="https://www.asianwildcattle.org/saola.html" target="_blank">Asian Wild Cattle Specialist Group</a>;
+            <a href="https://www.amnh.org/research/center-for-biodiversity-conservation/research-and-conservation/biodiversity-exploration-and-monitoring/past-projects/the-saola" target="_blank">American Museum of Natural History</a>.
+          </p>
+          <p class="lang-hi">
+            WWF; IUCN रेड लिस्ट; एशियन वाइल्ड कैटल स्पेशलिस्ट ग्रुप; अमेरिकन म्यूजियम ऑफ नेचुरल हिस्ट्री।
+          </p>
+        </div>
+
+      </div>
+    </article>
+
+
+
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4><span class="lang-en">About this project</span><span class="lang-hi">इस परियोजना के बारे में</span></h4>
+        <p style="font-size:0.9rem;opacity:0.85;">
+          <span class="lang-en">Educational single-page encyclopedia inspired by the IUCN Red List. Built with pure HTML & CSS only.</span>
+          <span class="lang-hi">IUCN रेड लिस्ट से प्रेरित शैक्षिक एकल-पृष्ठ विश्वकोश। केवल शुद्ध HTML और CSS से निर्मित।</span>
+        </p>
+      </div>
+      <div>
+        <h4><span class="lang-en">Key References</span><span class="lang-hi">मुख्य संदर्भ</span></h4>
+        <ul>
+          <li><a href="https://www.iucnredlist.org" target="_blank" rel="noopener">IUCN Red List</a></li>
+          <li><a href="https://www.worldwildlife.org" target="_blank" rel="noopener">WWF</a></li>
+          <li><a href="https://www.iucn.org" target="_blank" rel="noopener">IUCN</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4><span class="lang-en">Important</span><span class="lang-hi">महत्वपूर्ण</span></h4>
+        <p style="font-size:0.85rem;opacity:0.85;">
+          <span class="lang-en">Status and population figures change. Always consult the official IUCN Red List for the latest assessments. This site is for education and awareness.</span>
+          <span class="lang-hi">स्थिति और जनसंख्या आंकड़े बदलते रहते हैं। नवीनतम आकलनों के लिए हमेशा आधिकारिक IUCN रेड लिस्ट देखें। यह साइट शिक्षा और जागरूकता के लिए है।</span>
+        </p>
+      </div>
+    </div>
+    <div class="copyright">
+      © Interactive Red Data Book · Educational non-commercial project · Data based on publicly available IUCN & conservation sources
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
